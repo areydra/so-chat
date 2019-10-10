@@ -8,10 +8,16 @@ const SearchComponent = props => {
 
     return (
         <View style={styles.containerSearch} >
-            <TouchableOpacity style={{ justifyContent: 'center' }} onPress={() => props.onSearch(text)}>
+            <TouchableOpacity style={{ justifyContent: 'center' }} onPress={() => {
+                props.onSearch(text)
+                setText('')
+                }}>
                 <Image source={require('../assets/icons/Search.png')} style={styles.iconSearch} />
             </TouchableOpacity>
-            <TextInput style={styles.search} placeholder='Search here...' returnKeyType='go' onChangeText={text => setText(text)} onSubmitEditing={() => props.onSearch(text)} />
+            <TextInput style={styles.search} placeholder='Search here...' returnKeyType='go' onChangeText={text => setText(text)} onSubmitEditing={() => {
+                props.onSearch(text)
+                setText('')
+                }} />
         </View>
     );
 };

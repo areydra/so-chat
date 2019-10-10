@@ -13,6 +13,8 @@ class Messages extends Component {
     users : [],
     messagesUser : [],
     updateCurrentLocation: [],
+    filtered: [],
+    statusFilter: false,
     appState: AppState.currentState
    }
 
@@ -20,7 +22,6 @@ class Messages extends Component {
      let user = firebase.auth().currentUser
 
      AppState.addEventListener('change', this._handleAppStateChange)
-
      await firebase.database().ref('messages/' + user.uid).on('value', message => {      
        
         if(message.val()){
@@ -50,7 +51,6 @@ class Messages extends Component {
           })
         }
       })
-
      await firebase.database().ref('users/' + user.uid).once('value', val => {
        let users = val.val()[Object.keys(val.val())]
        
@@ -74,8 +74,11 @@ class Messages extends Component {
   }
 
   componentWillUnmount() {
-    AppState.removeEventListener('change', this._handleAppStateChange);
-    firebase.database().ref('messages/' + user.uid).on('value', message => {})
+    let user = firebase.auth().currentUser
+    if(user){
+      AppState.removeEventListener('change', this._handleAppStateChange);
+      firebase.database().ref('messages/' + user.uid).on('value', message => {})
+    }
   }
 
   _handleAppStateChange = (nextAppState) => {
@@ -138,12 +141,20 @@ class Messages extends Component {
      )
    }
 
-   handleSearch = searched => {
-     console.log(searched)
+   handleSearch = async(searched) => {
+     let filtered =_.filter(this.state.messagesUser, obj => {
+                      return _.startsWith(obj.name, searched)
+                    })
+    await this.setState({ filtered, statusFilter: true })
    }
 
   render() { 
-    let newestMessage = _.orderBy(this.state.messagesUser, (e) => e.message.time, ['desc'])
+    let newestMessage = []
+    if(this.state.statusFilter){
+      newestMessage = _.orderBy(this.state.filtered, (e) => e.message.time, ['desc'])
+    }else{
+      newestMessage = _.orderBy(this.state.messagesUser, (e) => e.message.time, ['desc'])
+    }
     let uniqMessage = _.uniqBy(newestMessage, 'uid')
 
     return (

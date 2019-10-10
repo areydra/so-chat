@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { SafeAreaView, Image, TouchableOpacity, StyleSheet, PermissionsAndroid, View, Text, TextInput, Dimensions } from 'react-native';
+import { SafeAreaView, Image, TouchableOpacity, StyleSheet, PermissionsAndroid, View, Text, TextInput, Dimensions, ScrollView } from 'react-native';
 import firebase from 'firebase'
 import ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -12,7 +12,8 @@ class Profile extends Component {
             uid: null,
             email: null,
             name: null
-        }
+        },
+        text: ''
      }
 
     componentDidMount = async() => {
@@ -136,31 +137,70 @@ class Profile extends Component {
         firebase.database().ref().update(updates)
     }
 
+    updateData = update => {
+        let user = firebase.auth().currentUser
+        if (user) {
+            firebase.database().ref('users/' + user.uid).once('value').then(res => {
+                let newData = {}
+                let key = Object.keys(res.val())
+                let data = res.val()
+                if (update === 'name') {
+                    if (this.state.text.length < 4) {
+                        newData = {
+                            user: {
+                                ...data[key],
+                                name: this.state.text
+                            }
+                        }
+                    }
+                } else if (update === 'myStatus') {
+                    newData = {
+                        user: {
+                            ...data[key],
+                            myStatus: this.state.text
+                        }
+                    }
+                } else if (update === 'phone') {
+                    newData = {
+                        user: {
+                            ...data[key],
+                            phone: this.state.text
+                        }
+                    }
+                }
+                firebase.database().ref('users/' + this.state.user.uid).update(newData)
+                this.setState({ text: '' })
+            })
+        }
+    }
+
     render() { 
         if(this.state.user.uid !== null) {
-            const { uid, email, name, phone, status, photo } = this.state.user
+            const { uid, email, name, phone, photo, myStatus } = this.state.user
             return (
                 <SafeAreaView style={styles.container}>
-                    <TouchableOpacity onPress={this.changeImage}>
-                        <View style={styles.imageProfile}>
-                            <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
-                            <Image source={require('../assets/icons/photo_camera.png')} style={{ height: 20, width: 20, position: 'absolute', bottom: 5, left: 50 }} />
+                    <ScrollView>
+                        <TouchableOpacity onPress={this.changeImage}>
+                            <View style={styles.imageProfile}>
+                                <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
+                                <Image source={require('../assets/icons/photo_camera.png')} style={{ height: 20, width: 20, position: 'absolute', bottom: 5, left: 50 }} />
+                            </View>
+                        </TouchableOpacity>
+                        <View style={styles.containerNameStatus}>
+                            <TextInput style={styles.name} defaultValue={name} onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('name') } />
+                            <TextInput style={styles.status} defaultValue={myStatus} placeholder='Add status' onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('myStatus') }  />
                         </View>
-                    </TouchableOpacity>
-                    <View style={styles.containerNameStatus}>
-                        <TextInput style={styles.name} value={(uid) ? name : null} />
-                        <TextInput style={styles.status} value={(uid) ? status : null} placeholder='Add status' />
-                    </View>
-                    <View style={styles.dataContainer}>
-                        <TextInput style={styles.data} value={(uid) ? email : null} />
-                        <TextInput style={styles.data} value={(uid) ? phone : null} placeholder='Phone number' />
-                        <TextInput style={styles.data} placeholder='Type here for change password' />
-                    </View>
-                    <TouchableOpacity onPress={this.handleSignOut}>
-                        <View style={styles.button}>
-                            <Text style={styles.buttonText}>Logout</Text>
+                        <View style={styles.dataContainer}>
+                            <Text style={styles.data}>{email}</Text>
+                            <TextInput style={styles.data} defaultValue={phone} placeholder='Phone number' keyboardType='number-pad' onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('phone') }  />
+                            <TextInput style={styles.data} placeholder='Type here for change password' />
                         </View>
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={this.handleSignOut}>
+                            <View style={styles.button}>
+                                <Text style={styles.buttonText}>Logout</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </ScrollView>
                 </SafeAreaView>
             );
         }else{
@@ -183,7 +223,7 @@ const styles = StyleSheet.create({
         marginTop: width / 10,
         overflow: 'hidden',
         position: 'relative',
-        backgroundColor: 'white'
+        backgroundColor: '#E3E3E3'
     },
     containerNameStatus: {
     },

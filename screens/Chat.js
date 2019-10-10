@@ -27,7 +27,9 @@ class Chat extends Component {
      }
 
      componentWillMount = () => {
-         firebase.database().ref('messages/').child(user.uid).child(uid).on('child_added')
+         let user = firebase.auth().currentUser
+         const { uid } = this.props.navigation.state.params.item
+         firebase.database().ref('messages/').child(user.uid).child(uid).on('child_added', newMessage => {})
      }
 
     handleSendMessage = () => {

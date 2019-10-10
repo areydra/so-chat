@@ -54,13 +54,9 @@ const Card = props => {
                     <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
                         <Text style={styles.cardTextName}>{item.name}</Text>
                     </TouchableOpacity>
-                    {
-                        (item.status) ?
-                            <View style={styles.cardStatusOrMessage}>
-                                <Text>{item.status}</Text>
-                            </View>
-                        : null
-                    }
+                    <View style={styles.cardStatusOrMessage}>
+                        <Text>{item.myStatus}</Text>
+                    </View>
                 </View>
                 <View style={styles.cardIconLocationContainer}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Map', {show: 'friend', friend: item})}>

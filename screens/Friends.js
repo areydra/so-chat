@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity, Dimensions } from 'react-native';
 import firebase from 'firebase'
+import _ from 'lodash'
 
 import Search from '../components/Search'
 import Card from '../components/Card'
@@ -11,6 +12,8 @@ const { width } = Dimensions.get('window')
 class Friends extends Component {
     state = { 
         users : [],
+        filtered: [],
+        statusFilter: false
      }
 
      componentDidMount = () => {
@@ -37,13 +40,27 @@ class Friends extends Component {
          )
      }
 
+    handleSearch = async (searched) => {
+        let filtered = _.filter(this.state.users, obj => {
+            return _.startsWith(obj.name, searched)
+        })
+        await this.setState({ filtered, statusFilter: true })
+    }
+
+
     render() { 
         let myUid = firebase.auth().currentUser
-        let friends = this.state.users.filter(user => user.uid !== myUid.uid)
+        let friends = []
+        if(this.state.statusFilter){
+            friends = this.state.filtered.filter(user => user.uid !== myUid.uid)
+        }else{
+            friends = this.state.users.filter(user => user.uid !== myUid.uid)
+        }
 
         return (
             <SafeAreaView style={styles.container}>
-                <Search />
+                <Search onSearch={this.handleSearch} />
+
                 <TouchableOpacity onPress={ () => this.props.navigation.navigate('Map', { show: 'all' }) }>
                     <Text style={{ textAlign: 'right', marginHorizontal: width / 30, color: '#F15249', fontWeight: 'bold' }}>Show all friends location</Text>
                 </TouchableOpacity>

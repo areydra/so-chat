@@ -10,6 +10,7 @@ const Login = props => {
     const [errorMessage, setErrorMessage] = useState('')
 
     const handleLogin = () => {
+        Keyboard.dismiss()
         firebase.auth().signInWithEmailAndPassword(email, password).then(user => {
             let updates = {}
 

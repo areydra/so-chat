@@ -13,8 +13,8 @@ const Register = props => {
 
     const handleRegister = () => {
         Keyboard.dismiss()
-        if (name.length < 5) {
-            setErrorMessage('Name should be at least 5 characters')
+        if (name.length < 4) {
+            setErrorMessage('Name should be at least 4 characters')
             return false
         }
         if(password !== rePassword){
