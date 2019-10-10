@@ -176,7 +176,7 @@ class Profile extends Component {
 
     render() { 
         if(this.state.user.uid !== null) {
-            const { uid, email, name, phone, photo, myStatus } = this.state.user
+            const { email, name, phone, photo, myStatus } = this.state.user
             return (
                 <SafeAreaView style={styles.container}>
                     <ScrollView>

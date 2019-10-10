@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, Image, TouchableOpacity, StyleSheet, Button, View, Text, TextInput, Dimensions } from 'react-native';
+import { SafeAreaView, Image, TouchableOpacity, StyleSheet, Modal, View, Text, TextInput, Dimensions } from 'react-native';
 import { withNavigation } from 'react-navigation'
 import firebase from 'firebase'
 import _ from 'lodash'
@@ -21,6 +21,7 @@ const convertTime = time => {
 
 const Card = props => {
     const [lastMessage, setLastMessage] = useState([])
+    const [visible, setVisible] = useState(false)
 
     useEffect(() => {
         getLastMessage()
@@ -42,14 +43,19 @@ const Card = props => {
         })
     }
 
+    const closeModal = () => {
+        setVisible(!visible)
+    }
 
     if(props.item && props.screen === 'friends'){
         const { item } = props
         return (
             <View style={styles.card}>
-                <View style={styles.cardImageContainer}>
-                    <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
-                </View>
+                <TouchableOpacity onPress={() => setVisible(true)}>
+                    <View style={styles.cardImageContainer}>
+                        <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
+                    </View>
+                </TouchableOpacity>
                 <View style={styles.cardTextContainer}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
                         <Text style={styles.cardTextName}>{item.name}</Text>
@@ -63,6 +69,27 @@ const Card = props => {
                         <Image source={require('../assets/icons/location.png')} style={styles.cardIconLocation} />
                     </TouchableOpacity>
                 </View>
+                {/* Modal */}
+                <Modal visible={visible} animationType='fade' transparent>
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <View style={{ alignSelf: 'center', height: 250, width: 250, backgroundColor: 'white', borderRadius: 20, position: 'relative', elevation: 3 }}>
+                            <View style={{ alignItems: 'center', margin: 10 }}>
+                                <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: 100, height: 100, borderRadius: 100 }} />
+                            </View>
+                            <TouchableOpacity onPress={closeModal} style={{ right: 10, top: 10, position: 'absolute', zIndex: 1 }}>
+                                <Image source={require('../assets/icons/cancel.png')} style={{ height: 20, width: 20 }} />
+                            </TouchableOpacity>
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={{ fontSize: 18 }}>{item.name}</Text>
+                                <Text style={{ fontSize: 10 }}>{item.myStatus}</Text>
+                            </View>
+                            <View style={{ alignItems: 'center', marginTop: 20 }}>
+                                <Text style={{ marginBottom: 10 }}>Email : {item.email}</Text>
+                                <Text style={{ marginBottom: 10 }}>{ (item.phone) ? 'Phone Number : ' + item.phone : null}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </View>
         );
     }else{
