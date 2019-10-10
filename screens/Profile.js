@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { SafeAreaView, Image, TouchableOpacity, StyleSheet, PermissionsAndroid, View, Text, TextInput, Dimensions, ScrollView } from 'react-native';
+import { SafeAreaView, Image, TouchableOpacity, Alert, StyleSheet, PermissionsAndroid, View, Text, TextInput, Dimensions, ScrollView } from 'react-native';
 import firebase from 'firebase'
 import ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -13,7 +13,8 @@ class Profile extends Component {
             email: null,
             name: null
         },
-        text: ''
+        text: '',
+        error: ''
      }
 
     componentDidMount = async() => {
@@ -173,6 +174,25 @@ class Profile extends Component {
         }
     }
 
+    updatePassword = () => {
+        if(this.state.text.length > 5){
+            firebase.auth().currentUser.updatePassword(this.state.text).then(() => {
+                Alert.alert(
+                    'Success', //title
+                    'Password has been updated', //message or description
+                    //button dengan text: '', lalu style:'', onPress: ketika di pencet/klik jalankan function reset
+                    [{ text: 'Close', style: 'destructive' }]
+                );
+            })
+            this.setState({ text: '' })
+        }else if(this.state.text.length > 0){
+            this.setState({ error : 'Password must be 6 character' })
+            this.setState({ text: '' })
+        }else{
+            this.setState({ text: '' })
+        }
+    }
+
     render() { 
         if(this.state.user.uid !== null) {
             const { email, name, phone, photo, myStatus } = this.state.user
@@ -192,7 +212,10 @@ class Profile extends Component {
                         <View style={styles.dataContainer}>
                             <Text style={styles.data}>{email}</Text>
                             <TextInput style={styles.data} defaultValue={phone} placeholder='Phone number' keyboardType='number-pad' onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('phone') }  />
-                            <TextInput style={styles.data} placeholder='Type here for change password' />
+                            {
+                                (this.state.error.length) ? <Text style={{ textAlign: 'center', color: 'red' }}>{this.state.error}</Text> : null
+                            }
+                            <TextInput style={styles.data} placeholder='Type here for change password' defaultValue={this.state.text} secureTextEntry={true} onChangeText={ text => this.setState({ text, error: '' }) } onSubmitEditing={ () => this.updatePassword() } />
                         </View>
                         <TouchableOpacity onPress={this.handleSignOut}>
                             <View style={styles.button}>
