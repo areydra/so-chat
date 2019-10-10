@@ -48,14 +48,18 @@ const Login = props => {
                     onChangeText={text => { 
                         setEmail(text)
                         setErrorMessage('')
-                    }} />
+                    }} 
+                    onSubmitEditing={() => handleLogin()}
+                    />
                 <TextInput style={input} secureTextEntry={true} placeholder='Password' 
                     value={password}
                     onChangeText={
                         text => { 
                             setPassword(text) 
                             setErrorMessage('')
-                    }} />
+                    }} 
+                    onSubmitEditing={() => handleLogin()}
+                    />
             </View>
             {
                 (errorMessage.length > 0) ? 
