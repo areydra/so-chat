@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { SafeAreaView, FlatList, Image, TouchableOpacity, StyleSheet, Button, View, Text, TextInput, Dimensions } from 'react-native';
+import { SafeAreaView, FlatList, Image, TouchableOpacity, StyleSheet, Modal, View, Text, TextInput, Dimensions } from 'react-native';
 import firebase from 'firebase'
-import AsyncStorage from '@react-native-community/async-storage'
 import moment from 'moment'
 
 const { width } = Dimensions.get('window')
@@ -10,7 +9,8 @@ class Chat extends Component {
     state = { 
         text : '',
         myUid : '',
-        messages : []
+        messages : [],
+        visible : false
      }
 
      componentDidMount = async() => {
@@ -95,13 +95,12 @@ class Chat extends Component {
                              <Image source={require('../assets/icons/arrow_back.png')} style={styles.arrowBack} />
                          </TouchableOpacity>
                          <View style={styles.containerImage}>
-                         <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
+                            <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
                          </View>
                          <View style={styles.headerNameContainer}>
                              <Text style={styles.headerName}>{name}</Text>
                              <Text>{(status === 'online') ? 'Online' : this.convertTimeStatus(status)}</Text>
                          </View>
-                         <Image source={require('../assets/icons/more.png')} style={styles.more} />
                      </View>
                      <View style={styles.messageContainer}>
                          <FlatList
@@ -119,7 +118,7 @@ class Chat extends Component {
                          <TouchableOpacity onPress={this.handleSendMessage} style={styles.send}>
                              <Image source={require('../assets/icons/send.png')} />
                          </TouchableOpacity>
-                     </View>
+                     </View>                 
                  </SafeAreaView>                 
          );
     }

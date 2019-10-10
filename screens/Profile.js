@@ -99,19 +99,18 @@ class Profile extends Component {
     };
 
     getUser = () => {
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                firebase.database().ref('users/' + user.uid).once('value').then(res => {
-                    let key = Object.keys(res.val())
-                    let data = res.val()
-                    let dataUser = {
-                        ...data[key],
-                        email: user.email,
-                    }
-                    this.setState({ user: dataUser })
-                })
-            }
-        })
+        let user = firebase.auth().currentUser
+        if (user) {
+            firebase.database().ref('users/' + user.uid).on('value', res => {
+                let key = Object.keys(res.val())
+                let data = res.val()
+                let dataUser = {
+                    ...data[key],
+                    email: user.email,
+                }
+                this.setState({ user: dataUser })
+            })
+        }
     }
 
     handleSignOut = () => {
