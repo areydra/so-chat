@@ -6,8 +6,14 @@ import { apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSen
 
 // Your web app's Firebase configuration
 const firebaseConfig = { apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId, appId }
+
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { //check if not initialize
+  firebase.initializeApp(firebaseConfig);
+}else{
+  firebase.app()
+}
+
 
 const App = () => {
     return (

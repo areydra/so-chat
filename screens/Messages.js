@@ -1,84 +1,75 @@
-import React, { Component } from 'react';
-import { SafeAreaView, StyleSheet, FlatList, AppState } from 'react-native';
-import firebase from 'firebase'
 import _ from 'lodash'
+import firebase from 'firebase'
+import React, { Component } from 'react';
 import geolocation from '@react-native-community/geolocation'
+import { SafeAreaView, StyleSheet, FlatList, AppState } from 'react-native';
 
-import Search from '../components/Search'
 import Card from '../components/Card'
+import Search from '../components/Search'
 
 class Messages extends Component {
   state = { 
-    messages : [],
     users : [],
+    filtered: [],
+    messages : [],
     messagesUser : [],
     updateCurrentLocation: [],
-    filtered: [],
-    statusFilter: false,
     appState: AppState.currentState
    }
 
-   componentDidMount = async() => {
-     let user = firebase.auth().currentUser
-
+  componentDidMount = async() => {
+     const user = firebase.auth().currentUser
+     await this.getGeolocation(user)
+     await this.getMessages(user)
      AppState.addEventListener('change', this._handleAppStateChange)
-     await firebase.database().ref('messages/' + user.uid).on('value', message => {      
-       
-        if(message.val()){
-          let messages = message.val()
-          Object.keys(message.val()).map(key => {
-            firebase.database().ref('users/'+key).on('value', user => {
-              if(user.val()){           
-                let key = Object.keys(user.val())
-                let users = user.val()[key]
-                let message = messages[users.uid]
-                let lastMessage = Object.keys(message).length - 1
-                let uniqMessage = message[Object.keys(message)[lastMessage]]
-                
-                this.setState(prevState => {
-                  if (uniqMessage.form === user.uid) {
-                    let messagesUser = [
-                      ...prevState.messagesUser, { uid: users.uid, name: users.name, photo: users.photo, message: uniqMessage }
-                    ]
-                    return {
-                      messagesUser
-                    }
-                  }
-                })            
-
-              }
-            })
-          })
-        }
-      })
-     await firebase.database().ref('users/' + user.uid).once('value', val => {
-       let users = val.val()[Object.keys(val.val())]
-       
-       geolocation.getCurrentPosition(position => {
-         let location = {
-           latitude: position.coords.latitude,
-           longitude: position.coords.longitude,
-         };
-
-         let updateCurrentLocation = {
-           user : {
-             ...users,
-             location: location
-           }
-         }
-        let updates = {}
-        updates['/users/' + users.uid] = updateCurrentLocation;
-        firebase.database().ref().update(updates)
-       })
-     })
   }
 
-  componentWillUnmount() {
-    let user = firebase.auth().currentUser
-    if(user){
-      AppState.removeEventListener('change', this._handleAppStateChange);
-      firebase.database().ref('messages/' + user.uid).on('value', message => {})
-    }
+  getGeolocation = user => {
+    firebase.database().ref('users/' + user.uid).once('value', val => {
+      let users = val.val()[Object.keys(val.val())]
+
+      geolocation.getCurrentPosition(position => {
+        let updateCurrentLocation = {
+          user: {
+            ...users,
+            location: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            }
+          }
+        }
+
+        firebase.database().ref('/users/' + users.uid).update(updateCurrentLocation)
+      })
+    })
+  }
+
+  getMessages = user => {
+    firebase.database().ref('messages/' + user.uid).on('value', message => {      
+      if(message.val())
+        Object.keys(message.val()).map(key => {
+          firebase.database().ref('users/'+key).on('value', person => {
+            if (person.val()) this.getMessage(user, person.val(), message.val())
+          })
+        })
+    })
+  }
+  
+  getMessage = (user, person, messages) => {
+    let message = messages[person.user.uid]
+    let lastMessage = Object.keys(message).length - 1
+    let uniqMessage = message[Object.keys(message)[lastMessage]]
+
+    this.setState(prevState => {
+      if (uniqMessage.from === user.uid) {
+        let messagesUser = [
+          ...prevState.messagesUser, { uid: person.user.uid, name: person.user.name, photo: person.user.photo, message: uniqMessage }
+        ]
+        return {
+          messagesUser
+        }
+      }
+    })
   }
 
   _handleAppStateChange = (nextAppState) => {
@@ -102,6 +93,7 @@ class Messages extends Component {
                   location: location
                 }
               }
+
               let updates = {}
               updates['users/' + users.uid] = updateStatus
               firebase.database().ref().update(updates)
@@ -135,26 +127,19 @@ class Messages extends Component {
     this.setState({ appState: nextAppState });
   };
 
+  handleSearch = async (searched) => {
+    let filtered = _.filter(this.state.messagesUser, obj => _.startsWith(obj.name, searched) )
+    await this.setState({ filtered })
+  }
+
    renderMessageUsers = data => {
      return(
        <Card screen='chat' item={data.item} screen='messages' />
      )
    }
 
-   handleSearch = async(searched) => {
-     let filtered =_.filter(this.state.messagesUser, obj => {
-                      return _.startsWith(obj.name, searched)
-                    })
-    await this.setState({ filtered, statusFilter: true })
-   }
-
   render() { 
-    let newestMessage = []
-    if(this.state.statusFilter){
-      newestMessage = _.orderBy(this.state.filtered, (e) => e.message.time, ['desc'])
-    }else{
-      newestMessage = _.orderBy(this.state.messagesUser, (e) => e.message.time, ['desc'])
-    }
+    let newestMessage = (this.state.filtered.length) ? _.orderBy(this.state.filtered, (e) => e.message.time, ['desc']) : _.orderBy(this.state.messagesUser, (e) => e.message.time, ['desc'])
     let uniqMessage = _.uniqBy(newestMessage, 'uid')
 
     return (

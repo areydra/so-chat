@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { SafeAreaView, Image, TouchableOpacity, Alert, StyleSheet, PermissionsAndroid, View, Text, TextInput, Dimensions, ScrollView } from 'react-native';
 import firebase from 'firebase'
-import ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
+import React, { Component } from 'react';
+import ImagePicker from 'react-native-image-picker';
+import { SafeAreaView, Image, TouchableOpacity, Alert, StyleSheet, PermissionsAndroid, View, Text, TextInput, Dimensions, ScrollView } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
@@ -34,7 +34,6 @@ class Profile extends Component {
             ]);
             return granted === PermissionsAndroid.RESULTS.GRANTED;
         } catch (err) {
-            console.log(err);
             return false;
         }
     };
@@ -101,7 +100,7 @@ class Profile extends Component {
 
     getUser = () => {
         let user = firebase.auth().currentUser
-        if (user) {
+        if (user) 
             firebase.database().ref('users/' + user.uid).on('value', res => {
                 let key = Object.keys(res.val())
                 let data = res.val()
@@ -111,41 +110,40 @@ class Profile extends Component {
                 }
                 this.setState({ user: dataUser })
             })
-        }
     }
 
     handleSignOut = () => {
+        let user = firebase.auth().currentUser
         firebase.auth().signOut().then(() => {
+            let updates = {}
+
+            // Change status to offline
+            firebase.database().ref('users/' + user.uid).once('value', val => {
+                let users = val.val()[Object.keys(val.val())]
+                let updateStatus = {
+                    user: {
+                        ...users,
+                        status: firebase.database.ServerValue.TIMESTAMP
+                    }
+                }
+
+                updates['users/' + users.uid] = updateStatus
+            })
+            firebase.database().ref().update(updates)
+
             this.props.navigation.navigate('AuthStack')
         })
-
-        let user = firebase.auth().currentUser
-        let updates = {}
-
-        firebase.database().ref('users/' + user.uid).once('value', val => {
-            let users = val.val()[Object.keys(val.val())]
-            let updateStatus = {
-                user: {
-                    ...users,
-                    status: firebase.database.ServerValue.TIMESTAMP
-                }
-            }
-
-            updates['users/' + users.uid] = updateStatus
-        })
-        
-        firebase.database().ref().update(updates)
     }
 
     updateData = update => {
         let user = firebase.auth().currentUser
-        if (user) {
+        if (user) 
             firebase.database().ref('users/' + user.uid).once('value').then(res => {
                 let newData = {}
                 let key = Object.keys(res.val())
                 let data = res.val()
                 if (update === 'name') {
-                    if (this.state.text.length < 4) {
+                    if (this.state.text.length > 4) {
                         newData = {
                             user: {
                                 ...data[key],
@@ -171,7 +169,7 @@ class Profile extends Component {
                 firebase.database().ref('users/' + this.state.user.uid).update(newData)
                 this.setState({ text: '' })
             })
-        }
+        
     }
 
     updatePassword = () => {
@@ -194,8 +192,8 @@ class Profile extends Component {
     }
 
     render() { 
-        if(this.state.user.uid !== null) {
-            const { email, name, phone, photo, myStatus } = this.state.user
+        const { uid, email, name, phone, photo, myStatus } = this.state.user
+        if(uid !== null) {
             return (
                 <SafeAreaView style={styles.container}>
                     <ScrollView>
@@ -206,14 +204,16 @@ class Profile extends Component {
                             </View>
                         </TouchableOpacity>
                         <View style={styles.containerNameStatus}>
-                            <TextInput style={styles.name} defaultValue={name} onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('name') } />
+                            <TextInput style={styles.name} onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('name') } 
+                                defaultValue={(name.length > 25) ? name.substr(0, 25) + '...' : name}
+                            />
                             <TextInput style={styles.status} defaultValue={myStatus} placeholder='Add status' onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('myStatus') }  />
                         </View>
                         <View style={styles.dataContainer}>
                             <Text style={styles.data}>{email}</Text>
                             <TextInput style={styles.data} defaultValue={phone} placeholder='Phone number' keyboardType='number-pad' onChangeText={ text => this.setState({ text }) } onSubmitEditing={ () => this.updateData('phone') }  />
                             {
-                                (this.state.error.length) ? <Text style={{ textAlign: 'center', color: 'red' }}>{this.state.error}</Text> : null
+                                (this.state.error.length) ? <Text style={styles.textError}>{this.state.error}</Text> : null
                             }
                             <TextInput style={styles.data} placeholder='Type here for change password' defaultValue={this.state.text} secureTextEntry={true} onChangeText={ text => this.setState({ text, error: '' }) } onSubmitEditing={ () => this.updatePassword() } />
                         </View>
@@ -285,6 +285,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'white',
         fontSize: 18
+    },
+
+    textError: {
+        textAlign: 'center', 
+        color: 'red'
     }
 });
 

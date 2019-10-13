@@ -1,22 +1,25 @@
+import _ from 'lodash'
+import firebase from 'firebase'
 import React, { Component } from 'react';
 import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity, Dimensions } from 'react-native';
-import firebase from 'firebase'
-import _ from 'lodash'
 
-import Search from '../components/Search'
 import Card from '../components/Card'
+import Search from '../components/Search'
 
 const { width } = Dimensions.get('window')
-
 
 class Friends extends Component {
     state = { 
         users : [],
-        filtered: [],
-        statusFilter: false
+        friends : [],
+        search : []
      }
 
-     componentDidMount = () => {
+     componentDidMount = async () => {
+        await this.getUser() 
+     }
+
+     getUser = () => {
         firebase.database().ref('users').on('child_added', users => {
             let key = Object.keys(users.val())
             let data = users.val()
@@ -30,9 +33,10 @@ class Friends extends Component {
         })
      }
 
-     componentWillMount = () => {
-         firebase.database().ref('users').on('child_added', users => {})
-     }
+    handleSearch = async (searched) => {
+        let search = _.filter(this.state.users, obj => _.startsWith(obj.name, searched) )
+        await this.setState({ search })
+    }
 
      card = user => {
          return(
@@ -40,33 +44,21 @@ class Friends extends Component {
          )
      }
 
-    handleSearch = async (searched) => {
-        let filtered = _.filter(this.state.users, obj => {
-            return _.startsWith(obj.name, searched)
-        })
-        await this.setState({ filtered, statusFilter: true })
-    }
-
-
     render() { 
-        let myUid = firebase.auth().currentUser
-        let friends = []
-        if(this.state.statusFilter){
-            friends = this.state.filtered.filter(user => user.uid !== myUid.uid)
-        }else{
-            friends = this.state.users.filter(user => user.uid !== myUid.uid)
-        }
+        const { search, users } = this.state
+        const user     = firebase.auth().currentUser
+        const filtered = (search.length) ? search.filter(person => person.uid !== user.uid) : users.filter(person => person.uid !== user.uid)
 
         return (
             <SafeAreaView style={styles.container}>
                 <Search onSearch={this.handleSearch} />
 
                 <TouchableOpacity onPress={ () => this.props.navigation.navigate('Map', { show: 'all' }) }>
-                    <Text style={{ textAlign: 'right', marginHorizontal: width / 30, color: '#F15249', fontWeight: 'bold' }}>Show all friends location</Text>
+                    <Text style={ styles.showAllFriendsText }>Show all friends location</Text>
                 </TouchableOpacity>
                 <FlatList 
                     keyExtractor={item => item.uid}
-                    data={friends}
+                    data={filtered}
                     renderItem={this.card}
                 />
             </SafeAreaView>
@@ -78,6 +70,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
+    showAllFriendsText: {
+        color: '#F15249', 
+        textAlign: 'right', 
+        fontWeight: 'bold',
+        marginHorizontal: width / 30
+    }
 });
 
 export default Friends;

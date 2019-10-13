@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
-import MapView, { Marker } from 'react-native-maps'
 import firebase from 'firebase'
+import React, { Component } from 'react';
+import MapView, { Marker } from 'react-native-maps'
+import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
@@ -9,29 +9,31 @@ class Map extends Component {
     state = { 
         users : [],
         userSelected : [],
-        profile: false
      }
 
-     componentDidMount = () => {
-         firebase.database().ref('users').on('child_added', users => {
-             let key = Object.keys(users.val())
-             let data = users.val()
-             let dataUsers = data[key]
+    componentDidMount = () => {
+        this.getUsers()
+    }
 
-             if(dataUsers.location !== undefined){
-                 this.setState(prevState => {
-                     return {
-                         users: [...prevState.users, dataUsers]
-                     }
-                 })
-             }
-         })
-        }
-        
+    getUsers = () => {
+        firebase.database().ref('users').on('child_added', users => {
+            let key = Object.keys(users.val())
+            let data = users.val()
+            let dataUsers = data[key]
+
+            if (dataUsers.location !== undefined) {
+                this.setState(prevState => {
+                    return {
+                        users: [...prevState.users, dataUsers]
+                    }
+                })
+            }
+        })
+    }
+
     render() { 
         let myLocation = firebase.auth().currentUser
         const { show, friend } = this.props.navigation.state.params 
-        console.log(friend)
         
         return (
             <SafeAreaView style={styles.container}>
@@ -44,18 +46,13 @@ class Map extends Component {
                 <View style={styles.locationContainer}>
                         {
                             (show === 'all') ?
-                                <MapView
-                                    style={styles.locationContainer}
+                                <MapView style={styles.locationContainer} zoomControlEnabled={true} showsUserLocation={true} followUserLocation={true}
                                     region={{
                                         latitude: -6.778489,
                                         longitude: 107.122118,
                                         latitudeDelta: 25,
                                         longitudeDelta: 25,
-                                    }}
-                                    zoomControlEnabled={true}
-                                    showsUserLocation={true}
-                                    followUserLocation={true}
-                                >
+                                    }}>
                                     {this.state.users.map((user, index) => (
                                         <Marker
                                             key={index}
@@ -64,7 +61,6 @@ class Map extends Component {
                                                 longitude: user.location.longitude
                                             }}
                                             title={user.name}
-                                            // description={user.description}
                                             identifier={user.index}
                                             pinColor={(myLocation.uid === user.uid) ? '#2D9CDB' : 'red'}
                                             onCalloutPress={(myLocation.uid !== user.uid) ? () => this.props.navigation.navigate('Chat', {item: user}) : null}
@@ -72,38 +68,22 @@ class Map extends Component {
                                      ))}
                                 </MapView>
                             : 
-                                <MapView
-                                    style={styles.locationContainer}
+                                <MapView style={styles.locationContainer} zoomControlEnabled={true} showsUserLocation={true} followUserLocation={true}
                                     region={{
                                         latitude: friend.location.latitude,
                                         longitude: friend.location.longitude,
                                         latitudeDelta: 0.015,
                                         longitudeDelta: 0.0121,
-                                    }}
-                                    zoomControlEnabled={true}
-                                    showsUserLocation={true}
-                                    followUserLocation={true}
-                                    onCalloutPress={() => this.props.navigation.navigate('Chat', {item: friend}) }
-                                >
+                                    }}>
                                     <Marker
                                         coordinate={{
                                             latitude: friend.location.latitude,
                                             longitude: friend.location.longitude
                                         }}
                                         title={friend.name}
-                                        // description={user.description}
+                                        onCalloutPress={() => this.props.navigation.navigate('Chat', { item: friend })}
                                     />
                                 </MapView>
-                        }
-                        {
-                            (this.state.profile) ?
-                                <View style={{ height: 150, backgroundColor: 'white'}}>
-                                    <TouchableOpacity onPress={ () => this.setState(prevState => ({ profile : !prevState.profile })) }>
-                                        <Text style={{ textAlign: 'right', marginRight: 10, fontSize: 20 }}>X</Text>
-                                        <Text>{ this.state.userSelected.name }</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            : null
                         }
                 </View>
             </SafeAreaView>
@@ -126,7 +106,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         height: width / 8,
-        // justifyContent: 'center',
         borderBottomWidth: 1,
         borderBottomColor: '#E3E3E3'
     },

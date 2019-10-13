@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import { SafeAreaView, FlatList, Image, TouchableOpacity, StyleSheet, Modal, View, Text, TextInput, Dimensions } from 'react-native';
-import firebase from 'firebase'
 import moment from 'moment'
+import firebase from 'firebase'
+import React, { Component } from 'react';
+import { SafeAreaView, FlatList, Image, TouchableOpacity, StyleSheet, View, Text, TextInput, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
@@ -9,37 +9,34 @@ class Chat extends Component {
     state = { 
         text : '',
         myUid : '',
-        messages : [],
-        visible : false
+        messages : []
      }
 
-     componentDidMount = async() => {
+     componentDidMount = () => {
+         this.getMessage()
+     }
+
+     getMessage = () => {
          let user = firebase.auth().currentUser
          const { uid } = this.props.navigation.state.params.item
 
-         await firebase.database().ref('messages/').child(user.uid).child(uid).on('child_added', newMessage => {
+         firebase.database().ref('messages/').child(user.uid).child(uid).on('child_added', newMessage => {
              this.setState(prevState => {
                  return {
-                     messages: [...prevState.messages.reverse() , newMessage.val()].reverse()
+                     messages: [...prevState.messages.reverse(), newMessage.val()].reverse()
                  }
              })
          })
      }
 
-     componentWillMount = () => {
-         let user = firebase.auth().currentUser
-         const { uid } = this.props.navigation.state.params.item
-         firebase.database().ref('messages/').child(user.uid).child(uid).on('child_added', newMessage => {})
-     }
-
     handleSendMessage = () => {
-        if(this.state.text.length){
-            let user = firebase.auth().currentUser
-            const { text } = this.state
-            const { uid } = this.props.navigation.state.params.item
+        const updates = {}
+        const { text } = this.state
+        const user     = firebase.auth().currentUser
+        const { uid }  = this.props.navigation.state.params.item
 
+        if(text.length){
             let messageId = firebase.database().ref('messages').child(user.uid).child(uid).push().key
-            let updates = {}
     
             let message = {
                 message: text,
@@ -60,9 +57,11 @@ class Chat extends Component {
         let current = new Date();
         let result = (record.getHours() < 10 ? '0' : '') + record.getHours() + ':';
         result += (record.getMinutes() < 10 ? '0' : '') + record.getMinutes();
+    
         if (current.getDay() !== record.getDay()) {
             result = moment(time).format('ddd') + '  ' + result
         }
+    
         return result;
     };
 
@@ -74,20 +73,21 @@ class Chat extends Component {
         let user = firebase.auth().currentUser
         return(
             (data.item.from !== user.uid) ?
-                <View style={styles.messageFriend}>
-                    <Text style={{ color: 'white', marginLeft: -25 }}>{data.item.message} </Text>
-                    <Text style={{fontSize: 10, marginTop: -3, marginRight: -25, textAlign: 'right', color: 'white' }}>{this.convertTime(data.item.time)}</Text>
+                <View style={styles.messageFriendContainer}>
+                    <Text style={ styles.messageFriend }>{data.item.message} </Text>
+                    <Text style={ styles.messageFriendTime }>{this.convertTime(data.item.time)}</Text>
                 </View>
             :
-                <View style={styles.message}>
-                    <Text style={{ marginLeft: -25 }}>{data.item.message} </Text>
-                    <Text style={{ fontSize: 10, marginTop: -3, marginRight: -25, textAlign: 'right' }}>{this.convertTime(data.item.time)}</Text>
+                <View style={styles.messageUserContainer}>
+                    <Text style={ styles.messageUser }>{data.item.message} </Text>
+                    <Text style={ styles.messageUserTime }>{this.convertTime(data.item.time)}</Text>
                 </View>
         )
     }
 
      render() { 
-        const { uid, name, status, photo} = this.props.navigation.state.params.item
+        const { name, status, photo} = this.props.navigation.state.params.item
+
          return (
                  <SafeAreaView style={styles.container}>
                      <View style={styles.header}>
@@ -95,10 +95,10 @@ class Chat extends Component {
                              <Image source={require('../assets/icons/arrow_back.png')} style={styles.arrowBack} />
                          </TouchableOpacity>
                          <View style={styles.containerImage}>
-                            <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
+                            <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM.png' }} style={ styles.image } />
                          </View>
                          <View style={styles.headerNameContainer}>
-                             <Text style={styles.headerName}>{name}</Text>
+                             <Text style={styles.headerName}>{(name.length > 25) ? name.substr(0, 25) + '...' : name}</Text>
                              <Text>{(status === 'online') ? 'Online' : this.convertTimeStatus(status)}</Text>
                          </View>
                      </View>
@@ -114,7 +114,10 @@ class Chat extends Component {
                          />
                      </View>
                      <View style={styles.textInputContainer}>
-                         <TextInput placeholder='Tell me. U love me' style={styles.textInput} onChangeText={text => this.setState({ text })} value={this.state.text} />
+                         <TextInput placeholder='Tell me. U love me' style={styles.textInput} 
+                                    onChangeText={text => this.setState({ text })} value={this.state.text} 
+                                    returnKeyType='send' onSubmitEditing={this.handleSendMessage}
+                                    />
                          <TouchableOpacity onPress={this.handleSendMessage} style={styles.send}>
                              <Image source={require('../assets/icons/send.png')} />
                          </TouchableOpacity>
@@ -147,6 +150,11 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         backgroundColor: 'white',
     },
+    image: {
+        width: '100%', 
+        height: '100%', 
+        resizeMode: 'cover'
+    },
     headerNameContainer: {
         marginLeft: 5,
         width: '55%'
@@ -164,10 +172,9 @@ const styles = StyleSheet.create({
         marginHorizontal: 10
     },
     messageLists: {
-        flexGrow: 1,
-        // alignItems: 'flex-end'
+        flexGrow: 1
     },
-    message: {
+    messageUserContainer: {
         backgroundColor: '#E5E5E5', 
         paddingVertical: 5, 
         paddingHorizontal: 40, 
@@ -176,7 +183,16 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         borderRadius: 25
     },
-    messageFriend: {
+    messageUser: {
+        marginLeft: -25
+    },
+    messageUserTime: {
+        fontSize: 10, 
+        marginTop: -3, 
+        marginRight: -25, 
+        textAlign: 'right'
+    },
+    messageFriendContainer: {
         backgroundColor: '#2FAEB2',
         paddingVertical: 5,
         paddingHorizontal: 40,
@@ -184,6 +200,17 @@ const styles = StyleSheet.create({
         color: 'white',
         alignSelf: 'flex-start',
         borderRadius: 25
+    },
+    messageFriend: {
+        color: 'white', 
+        marginLeft: -25
+    },
+    messageFriendTime: {
+        fontSize: 10, 
+        marginTop: -3, 
+        marginRight: -25, 
+        textAlign: 'right', 
+        color: 'white' 
     },
     textInputContainer: {
         borderWidth: 1,

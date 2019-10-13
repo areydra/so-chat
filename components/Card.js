@@ -1,35 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, Image, TouchableOpacity, StyleSheet, Modal, View, Text, TextInput, Dimensions } from 'react-native';
-import { withNavigation } from 'react-navigation'
-import firebase from 'firebase'
 import _ from 'lodash'
 import moment from 'moment'
+import firebase from 'firebase'
+import { withNavigation } from 'react-navigation'
+import React, { useEffect, useState } from 'react';
+import { Image, TouchableOpacity, StyleSheet, Modal, View, Text, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
-const convertTime = time => {
-    let record = new Date(time);
-    let current = new Date();
-    let result = (record.getHours() < 10 ? '0' : '') + record.getHours() + ':';
-    result += (record.getMinutes() < 10 ? '0' : '') + record.getMinutes();
-        if (current.getDay() !== record.getDay()) {
-            result = moment(time).format('dddd') + '  ' + result
-        }
-    return result;
-};
-
-
 const Card = props => {
-    const [lastMessage, setLastMessage] = useState([])
     const [visible, setVisible] = useState(false)
+    const [lastMessage, setLastMessage] = useState([])
+
+    const { item, screen } = props
+    const user = firebase.auth().currentUser
 
     useEffect(() => {
         getLastMessage()
     }, [])
 
     const getLastMessage = async() => {
-        let user = firebase.auth().currentUser
-        let person = props.item
+        let person = item
+
         await firebase.database().ref('messages/' + user.uid).on('value', message => {      
             if(message.val()){
                 let messages = message.val()[person.uid]
@@ -43,12 +34,22 @@ const Card = props => {
         })
     }
 
+    const convertTime = time => {
+        let record = new Date(time);
+        let current = new Date();
+        let result = (record.getHours() < 10 ? '0' : '') + record.getHours() + ':';
+        result += (record.getMinutes() < 10 ? '0' : '') + record.getMinutes();
+        if (current.getDay() !== record.getDay()) {
+            result = moment(time).format('dddd') + '  ' + result
+        }
+        return result;
+    };
+
     const closeModal = () => {
         setVisible(!visible)
     }
 
-    if(props.item && props.screen === 'friends'){
-        const { item } = props
+    if(item && screen === 'friends'){
         return (
             <View style={styles.card}>
                 <TouchableOpacity onPress={() => setVisible(true)}>
@@ -58,7 +59,7 @@ const Card = props => {
                 </TouchableOpacity>
                 <View style={styles.cardTextContainer}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
-                        <Text style={styles.cardTextName}>{item.name}</Text>
+                        <Text style={styles.cardTextName}>{(item.name.length > 25) ? item.name.substr(0, 25) + '...' : item.name}</Text>
                     </TouchableOpacity>
                     <View style={styles.cardStatusOrMessage}>
                         <Text>{item.myStatus}</Text>
@@ -69,15 +70,16 @@ const Card = props => {
                         <Image source={require('../assets/icons/location.png')} style={styles.cardIconLocation} />
                     </TouchableOpacity>
                 </View>
+
                 {/* Modal */}
                 <Modal visible={visible} animationType='fade' transparent>
-                    <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <View style={{ alignSelf: 'center', height: 250, width: 250, backgroundColor: 'white', borderRadius: 20, position: 'relative', elevation: 3 }}>
-                            <View style={{ alignItems: 'center', margin: 10 }}>
-                                <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: 100, height: 100, borderRadius: 100 }} />
+                    <View style={ styles.modalContainer }>
+                        <View style={ styles.modalChildContainer }>
+                            <View style={ styles.modalImageContainer }>
+                                <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={ styles.modalImage } />
                             </View>
-                            <TouchableOpacity onPress={closeModal} style={{ right: 10, top: 10, position: 'absolute', zIndex: 1 }}>
-                                <Image source={require('../assets/icons/cancel.png')} style={{ height: 20, width: 20 }} />
+                            <TouchableOpacity onPress={closeModal} style={ styles.modalIconContainer }>
+                                <Image source={require('../assets/icons/cancel.png')} style={ styles.modalIcon } />
                             </TouchableOpacity>
                             <View style={{ alignItems: 'center' }}>
                                 <Text style={{ fontSize: 18 }}>{item.name}</Text>
@@ -93,31 +95,28 @@ const Card = props => {
             </View>
         );
     }else{
-        const { item } = props
-        const user = firebase.auth().currentUser
-
         return (
             <View style={styles.card}>
                 <View style={styles.cardImageContainer}>
-                    <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
+                    <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={ styles.cardImage } />
                 </View>
                 <View style={styles.cardTextContainer}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
-                        <Text style={styles.cardTextName}>{item.name}</Text>
+                        <Text style={styles.cardTextName}>{(item.name.length > 20) ? item.name.substr(0, 20) + '...' : item.name}</Text>
                     </TouchableOpacity>
                     <View style={styles.cardStatusOrMessage}>
-                            {
-                                (lastMessage.message) ? 
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Text>{ lastMessage.message } </Text>
-                                        {
-                                            (lastMessage.from === user.uid) ?
-                                                <Image source={require('../assets/icons/read.png')} style={styles.cardStatus} />
-                                            : null
-                                        }
-                                    </View>
-                                : null
-                            }
+                        {
+                            (lastMessage.message) ? 
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Text>{ (lastMessage.message.length > 20) ? lastMessage.message.substr(0, 20) + '...' : lastMessage.message } </Text>
+                                    {
+                                        (lastMessage.from === user.uid) ?
+                                            <Image source={require('../assets/icons/read.png')} style={styles.cardStatus} />
+                                        : null
+                                    }
+                                </View>
+                            : null
+                        }
                         <Text style={{ textAlign: 'right' }}>{convertTime(item.message.time)}</Text>
                     </View>
                 </View>
@@ -127,6 +126,39 @@ const Card = props => {
 };
 
 const styles = StyleSheet.create({
+    modalContainer: {
+        flex: 1, 
+        justifyContent: 'center'
+    },
+    modalChildContainer: {
+        alignSelf: 'center', 
+        height: 250, 
+        width: 250, 
+        backgroundColor: 'white', 
+        borderRadius: 20, 
+        position: 'relative', 
+        elevation: 3
+    },
+    modalImageContainer: {
+        alignItems: 'center', 
+        margin: 10
+    },
+    modalImage: {
+        width: 100, 
+        height: 100, 
+        borderRadius: 100   
+    },
+    modalIconContainer: {
+        right: 10, 
+        top: 10, 
+        position: 'absolute', 
+        zIndex: 1
+    },
+    modalIcon: {
+        height: 20, 
+        width: 20
+    },
+
     card: {
         height: 80,
         borderBottomWidth: 1,
@@ -142,6 +174,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 65,
         overflow: 'hidden'
+    },
+    cardImage: {
+        width: '100%', 
+        height: '100%', 
+        resizeMode: 'cover'
     },
     cardTextContainer: {
         marginLeft: 15,
