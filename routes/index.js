@@ -27,6 +27,7 @@ const MessagesStack = createStackNavigator({
 
     if (routeName === 'Map' || routeName === 'Chat') {
       navigationOptions.tabBarVisible = false;
+      navigationOptions.swi
     }
 
     return navigationOptions;
@@ -46,6 +47,7 @@ const FriendsStack = createStackNavigator({
 
     if (routeName === 'Map') {
       navigationOptions.tabBarVisible = false;
+      navigationOptions.swipeEnabled = false
     }
 
     return navigationOptions;

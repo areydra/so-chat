@@ -1,6 +1,7 @@
 import firebase from 'firebase'
 import React, { Component } from 'react';
 import MapView, { Marker } from 'react-native-maps'
+import { Thumbnail } from 'native-base'
 import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
 
 const { width } = Dimensions.get('window')
@@ -34,7 +35,8 @@ class Map extends Component {
     render() { 
         let myLocation = firebase.auth().currentUser
         const { show, friend } = this.props.navigation.state.params 
-        
+        console.log(friend)
+
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.titleContainer}>
@@ -62,9 +64,12 @@ class Map extends Component {
                                             }}
                                             title={user.name}
                                             identifier={user.index}
-                                            pinColor={(myLocation.uid === user.uid) ? '#2D9CDB' : 'red'}
                                             onCalloutPress={(myLocation.uid !== user.uid) ? () => this.props.navigation.navigate('Chat', {item: user}) : null}
-                                        />
+                                        >
+                                            <Thumbnail small source={{ uri: (user.photo) ? user.photo : "https://www.shareicon.net/data/2016/09/01/822711_user_512x512.png" }} 
+                                                style={{ borderWidth: 2, borderColor: (myLocation.uid === user.uid) ? '#2FAEB2' : (user.status === 'online') ? '#00ff2f' : 'grey' }} 
+                                            />
+                                        </Marker>
                                      ))}
                                 </MapView>
                             : 
@@ -82,7 +87,11 @@ class Map extends Component {
                                         }}
                                         title={friend.name}
                                         onCalloutPress={() => this.props.navigation.navigate('Chat', { item: friend })}
-                                    />
+                                    >
+                                        <Thumbnail small source={{ uri: (friend.photo) ? friend.photo : "https://www.shareicon.net/data/2016/09/01/822711_user_512x512.png" }} 
+                                            style={{ borderWidth: 2, borderColor: (friend.status === 'online') ? '#00ff2f' : 'grey' }} 
+                                        />
+                                    </Marker>
                                 </MapView>
                         }
                 </View>

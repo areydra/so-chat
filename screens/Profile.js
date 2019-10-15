@@ -9,9 +9,9 @@ const { width } = Dimensions.get('window')
 class Profile extends Component {
     state = { 
         user : {
-            uid: null,
-            email: null,
-            name: null
+            uid: '',
+            email: '',
+            name: ''
         },
         text: '',
         error: ''
@@ -83,14 +83,16 @@ class Profile extends Component {
                     })
                     .then(url => {
                         firebase.database().ref('users/' + user.uid).once('value', val => {
-                            let users = val.val()[Object.keys(val.val())]
-                            let updateUser = {
-                                                user: {
-                                                    ...users,
-                                                    photo: url
+                            if(val.val()){
+                                let users = val.val()[Object.keys(val.val())]
+                                let updateUser = {
+                                                    user: {
+                                                        ...users,
+                                                        photo: url
+                                                    }
                                                 }
-                                            }
-                            firebase.database().ref('users/' + user.uid).update(updateUser);
+                                firebase.database().ref('users/' + user.uid).update(updateUser);
+                            }
                         })
                     })
                     .catch(err => console.log(err));
@@ -102,13 +104,15 @@ class Profile extends Component {
         let user = firebase.auth().currentUser
         if (user) 
             firebase.database().ref('users/' + user.uid).on('value', res => {
-                let key = Object.keys(res.val())
-                let data = res.val()
-                let dataUser = {
-                    ...data[key],
-                    email: user.email,
+                if(res.val()){
+                    let key = Object.keys(res.val())
+                    let data = res.val()
+                    let dataUser = {
+                        ...data[key],
+                        email: user.email,
+                    }
+                    this.setState({ user: dataUser })
                 }
-                this.setState({ user: dataUser })
             })
     }
 
@@ -119,17 +123,18 @@ class Profile extends Component {
 
             // Change status to offline
             firebase.database().ref('users/' + user.uid).once('value', val => {
-                let users = val.val()[Object.keys(val.val())]
-                let updateStatus = {
-                    user: {
-                        ...users,
-                        status: firebase.database.ServerValue.TIMESTAMP
+                if(val.val()){
+                    let users = val.val()[Object.keys(val.val())]
+                    let updateStatus = {
+                        user: {
+                            ...users,
+                            status: firebase.database.ServerValue.TIMESTAMP
+                        }
                     }
+                    updates['users/' + users.uid] = updateStatus
+                    firebase.database().ref().update(updates)
                 }
-
-                updates['users/' + users.uid] = updateStatus
             })
-            firebase.database().ref().update(updates)
 
             this.props.navigation.navigate('AuthStack')
         })
@@ -139,35 +144,37 @@ class Profile extends Component {
         let user = firebase.auth().currentUser
         if (user) 
             firebase.database().ref('users/' + user.uid).once('value').then(res => {
-                let newData = {}
-                let key = Object.keys(res.val())
-                let data = res.val()
-                if (update === 'name') {
-                    if (this.state.text.length > 4) {
+                if(res.val()){
+                    let newData = {}
+                    let key = Object.keys(res.val())
+                    let data = res.val()
+                    if (update === 'name') {
+                        if (this.state.text.length > 4) {
+                            newData = {
+                                user: {
+                                    ...data[key],
+                                    name: this.state.text
+                                }
+                            }
+                        }
+                    } else if (update === 'myStatus') {
                         newData = {
                             user: {
                                 ...data[key],
-                                name: this.state.text
+                                myStatus: this.state.text
+                            }
+                        }
+                    } else if (update === 'phone') {
+                        newData = {
+                            user: {
+                                ...data[key],
+                                phone: this.state.text
                             }
                         }
                     }
-                } else if (update === 'myStatus') {
-                    newData = {
-                        user: {
-                            ...data[key],
-                            myStatus: this.state.text
-                        }
-                    }
-                } else if (update === 'phone') {
-                    newData = {
-                        user: {
-                            ...data[key],
-                            phone: this.state.text
-                        }
-                    }
+                    firebase.database().ref('users/' + this.state.user.uid).update(newData)
+                    this.setState({ text: '' })
                 }
-                firebase.database().ref('users/' + this.state.user.uid).update(newData)
-                this.setState({ text: '' })
             })
         
     }
@@ -191,7 +198,7 @@ class Profile extends Component {
         }
     }
 
-    render() { 
+    render() {
         const { uid, email, name, phone, photo, myStatus } = this.state.user
         if(uid !== null) {
             return (

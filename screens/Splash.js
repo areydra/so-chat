@@ -1,17 +1,42 @@
-import React, { useEffect } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, Dimensions } from 'react-native';
 import firebase from 'firebase'
+import React, { useEffect } from 'react';
+import { SafeAreaView, StyleSheet, View, Text, Dimensions, PermissionsAndroid } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
 const Splash = props => {
+    
     useEffect(() => {
-        setTimeout(() => {
-            firebase.auth().onAuthStateChanged(user => {
-                props.navigation.navigate(user ? 'Swipe' : 'AuthStack')
-            })
-        }, 1000)
+        checkPermission()
     },[])
+
+    let checkPermission = async() => {
+        let locationPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+
+        if(!locationPermission) locationPermission = await requestLocationPermission()
+
+        if(!locationPermission){
+            firebase.auth().signOut()
+            props.navigation.navigate('AuthStack')
+        }else{
+            setTimeout(() => {
+                firebase.auth().onAuthStateChanged(user => {
+                    props.navigation.navigate(user ? 'Swipe' : 'AuthStack')
+                })
+            }, 1000)
+        }
+    }
+
+    requestLocationPermission = async () => {
+        try {
+            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+            return granted === PermissionsAndroid.RESULTS.GRANTED
+        } catch (err) {
+            console.warn(err)
+            return false
+        }
+    };
+
     return (
         <SafeAreaView style={styles.brandContainer}>
             <Text style={styles.brand}>So Chat</Text>

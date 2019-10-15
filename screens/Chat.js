@@ -9,11 +9,13 @@ class Chat extends Component {
     state = { 
         text : '',
         myUid : '',
+        status: null,
         messages : []
      }
 
      componentDidMount = () => {
          this.getMessage()
+         this.getStatus()
      }
 
      getMessage = () => {
@@ -85,10 +87,19 @@ class Chat extends Component {
         )
     }
 
-     render() { 
-        const { name, status, photo} = this.props.navigation.state.params.item
+    getStatus = () => {
+        const { uid } = this.props.navigation.state.params.item
+        firebase.database().ref('users/' + uid).on('child_changed', user => {
+            if (user)
+                this.setState({ status: user.val() })
+        })
+    }
 
-         return (
+     render() { 
+        const { name, photo } = this.props.navigation.state.params.item
+        const status = (this.state.status === null) ? this.props.navigation.state.params.item.status : this.state.status.status
+
+        return (
                  <SafeAreaView style={styles.container}>
                      <View style={styles.header}>
                          <TouchableOpacity onPress={() => this.props.navigation.goBack()}>

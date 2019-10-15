@@ -26,21 +26,17 @@ class Messages extends Component {
 
   getGeolocation = user => {
     firebase.database().ref('users/' + user.uid).once('value', val => {
-      let users = val.val()[Object.keys(val.val())]
-
-      geolocation.getCurrentPosition(position => {
-        let updateCurrentLocation = {
-          user: {
-            ...users,
-            location: {
+      if(val.val()){
+        let users = val.val()[Object.keys(val.val())]
+        geolocation.getCurrentPosition(position => {
+          let location = {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
             }
-          }
-        }
 
-        firebase.database().ref('/users/' + users.uid).update(updateCurrentLocation)
-      })
+          firebase.database().ref('users/' + users.uid + '/' + Object.keys(val.val())).update({ location : location, status: 'online' })
+        })
+      }
     })
   }
 

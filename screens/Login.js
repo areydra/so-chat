@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, TouchableOpacity, StyleSheet, Keyboard, View, Text, TextInput, Dimensions } from 'react-native';
+import { SafeAreaView, TouchableOpacity, StyleSheet, Keyboard, View, Text, TextInput, Dimensions, PermissionsAndroid, Alert } from 'react-native';
 import firebase from 'firebase'
 
 const { width } = Dimensions.get('window')
@@ -11,28 +11,31 @@ const Login = props => {
 
     const handleLogin = () => {
         Keyboard.dismiss()
+        checkPermission()
+    }
+
+    let checkPermission = async () => {
+        let locationPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+
+        if (!locationPermission) {
+            Alert.alert(
+                'Failed', //title
+                'You must be granted location permission', //message or description
+                //button dengan text: '', lalu style:'', onPress: ketika di pencet/klik jalankan function reset
+                [{ text: 'Close', style: 'destructive' }]
+            );
+        } else {
+            console.log('sampe')
+            processLogin()
+        }
+    }
+
+    const processLogin = () => {
         firebase.auth().signInWithEmailAndPassword(email, password).then(user => {
-            let updates = {}
-
-            firebase.database().ref('users/' + user.user.uid).once('value', val => {
-                let users = val.val()[Object.keys(val.val())]
-                let updateStatus = {
-                    user: {
-                        ...users,
-                        status: 'online'
-                    }
-                }
-
-                updates['users/' + users.uid] = updateStatus
-            })
-
-            firebase.database().ref().update(updates)
         }).catch(err => {
             setPassword('')
             setErrorMessage(err.message)
         })
-
-
     }
 
     let input = (errorMessage.length > 0) ? styles.inputError : styles.input
@@ -74,7 +77,7 @@ const Login = props => {
                 </View>
             </TouchableOpacity>
             <View style={styles.containerRegisterHere}>
-                <Text>You have account? </Text>
+                <Text>You don't have account? </Text>
                 <TouchableOpacity onPress={() => props.navigation.navigate('Register')}>
                     <Text style={styles.textRegisterHere}>Register here..</Text>
                 </TouchableOpacity>

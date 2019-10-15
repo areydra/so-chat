@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, TouchableOpacity, StyleSheet, View, Text, Keyboard, TextInput, Dimensions } from 'react-native';
+import { SafeAreaView, TouchableOpacity, StyleSheet, View, Text, Keyboard, TextInput, Dimensions, Alert, PermissionsAndroid } from 'react-native';
 import firebase from 'firebase'
 
 const { width } = Dimensions.get('window')
@@ -23,13 +23,31 @@ const Register = props => {
             return false
         }
 
+        checkPermission()
+    }
+
+    let checkPermission = async () => {
+        let locationPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+
+        if (!locationPermission) {
+            Alert.alert(
+                'Failed', //title
+                'You must be granted location permission', //message or description
+                //button dengan text: '', lalu style:'', onPress: ketika di pencet/klik jalankan function reset
+                [{ text: 'Close', style: 'destructive' }]
+            );
+        } else {
+            processRegister()
+        }
+    }
+    
+    const processRegister = () => {
         firebase.auth().createUserWithEmailAndPassword(email, password).then(res => {
             firebase.database().ref('users').child(res.user.uid).push({
-                uid: res.user.uid, 
-                name : name,
+                uid: res.user.uid,
+                name: name,
                 status: 'online'
             })
-
         }).catch((err) => {
             setErrorMessage(err.message)
         })
