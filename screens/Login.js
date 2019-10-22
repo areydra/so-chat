@@ -25,7 +25,6 @@ const Login = props => {
                 [{ text: 'Close', style: 'destructive' }]
             );
         } else {
-            console.log('sampe')
             processLogin()
         }
     }
