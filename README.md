@@ -18,6 +18,7 @@ SoChat is a app chat with your friends
 ## Features
 * Chat
 * Share location with friends
+* Live online status
 * And others
 
 ## Requirements
