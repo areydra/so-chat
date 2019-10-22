@@ -21,10 +21,6 @@ class Profile extends Component {
         await this.getUser()
     }
 
-    componentWillUnmount = async() => {
-        await this.getUser()
-    }
-
     requestCameraPermission = async () => {
         try {
             const granted = await PermissionsAndroid.requestMultiple([
