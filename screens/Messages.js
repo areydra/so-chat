@@ -95,45 +95,49 @@ class Messages extends Component {
         this.state.appState.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .once('value', val => {
-            let users = val.val()[Object.keys(val.val())];
+        if (user) {
+          firebase
+            .database()
+            .ref('users/' + user.uid)
+            .once('value', val => {
+              let users = val.val()[Object.keys(val.val())];
 
-            geolocation.getCurrentPosition(position => {
-              let location = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-              };
-
-              firebase
-                .database()
-                .ref('users/' + users.uid + '/' + Object.keys(val.val()))
-                .update({location: location, status: 'online'});
-            });
-          });
-      } else {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .once('value', val => {
-            let users = val.val()[Object.keys(val.val())];
-            geolocation.getCurrentPosition(position => {
-              let location = {
+              geolocation.getCurrentPosition(position => {
+                let location = {
                   latitude: position.coords.latitude,
                   longitude: position.coords.longitude,
-                }
+                };
 
-              firebase
-                .database()
-                .ref('users/' + users.uid + '/' + Object.keys(val.val()))
-                .update({
-                  location: location,
-                  status: firebase.database.ServerValue.TIMESTAMP,
-                });
-              })
-          });
+                firebase
+                  .database()
+                  .ref('users/' + users.uid + '/' + Object.keys(val.val()))
+                  .update({location: location, status: 'online'});
+              });
+            });
+        }
+      } else {
+        if (user) {
+          firebase
+            .database()
+            .ref('users/' + user.uid)
+            .once('value', val => {
+              let users = val.val()[Object.keys(val.val())];
+              geolocation.getCurrentPosition(position => {
+                let location = {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                };
+
+                firebase
+                  .database()
+                  .ref('users/' + users.uid + '/' + Object.keys(val.val()))
+                  .update({
+                    location: location,
+                    status: firebase.database.ServerValue.TIMESTAMP,
+                  });
+              });
+            });
+        }
       }
     }
 
