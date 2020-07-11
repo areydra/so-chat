@@ -1,36 +1,44 @@
 import React, { useState } from 'react';
 import { Image, TouchableOpacity, StyleSheet, View, TextInput, Dimensions } from 'react-native';
 
-const { width } = Dimensions.get('window')
-
 const SearchComponent = props => {
     const [text, setText] = useState('')
 
+    const onSearch = () => {
+        props.onSearch(text);
+        setText('');
+    }
+
     return (
-        <View style={styles.containerSearch} >
-            <TouchableOpacity style={{ justifyContent: 'center' }} onPress={() => {
-                props.onSearch(text)
-                setText('')
-            }}>
-                <Image source={require('../assets/icons/Search.png')} style={styles.iconSearch} />
+        <View style={Styles.containerSearch}>
+            <TextInput 
+                style={Styles.search} 
+                returnKeyType='search' 
+                placeholder='Search here...' 
+                onSubmitEditing={onSearch}
+                onChangeText={text => setText(text)} 
+            />
+            <TouchableOpacity style={Styles.containerIconSearch} onPress={onSearch}>
+                <Image source={require('../assets/icons/Search.png')} style={Styles.iconSearch} />
             </TouchableOpacity>
-            <TextInput style={styles.search} placeholder='Search here...' returnKeyType='go' onChangeText={text => setText(text)} onSubmitEditing={() => {
-                props.onSearch(text)
-                setText('')
-            }} />
         </View>
     );
 };
 
-const styles = StyleSheet.create({
+const Styles = StyleSheet.create({
     containerSearch: {
-        marginVertical: width / 18,
-        marginHorizontal: width / 25,
+        marginVertical: 12,
+        marginHorizontal: 12,
+        paddingLeft: 16,
+        paddingRight: 4,
         borderWidth: 1,
         borderRadius: 25,
         borderColor: '#E3E3E3',
         position: 'relative',
-        flexDirection: 'row'
+        flexDirection: 'row',
+    },
+    containerIconSearch: {
+        justifyContent: 'center'
     },
     iconSearch: {
         width: 35,
@@ -38,8 +46,7 @@ const styles = StyleSheet.create({
         marginLeft: 5
     },
     search: {
-        marginLeft: 10,
-        width: width / 1.5
+       flex: 1
     }
 });
 
