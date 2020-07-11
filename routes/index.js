@@ -62,7 +62,7 @@ const Swipe = createMaterialTopTabNavigator(
  },
  {
     initialRouteName: 'Messages',
-    tabBarPosition: 'bottom',
+    tabBarPosition: 'top',
     swipeEnabled: true,
     animationEnabled: true,
     tabBarOptions: {
