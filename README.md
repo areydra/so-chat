@@ -25,6 +25,8 @@ SoChat is a app chat with your friends
 * [`react-native`](https://facebook.github.io/react-native/docs/getting-started)
 * [`react-native-cli`](https://facebook.github.io/react-native/docs/getting-started)
 * [`Setting Up Provider Firebase`](https://console.firebase.google.com)
+* [`Setting Up Google Cloud Platform`](https://developers.google.com/maps/documentation/android-sdk/get-api-key)
+
 
 ## Usage for development
 1. Open your terminal or command prompt
