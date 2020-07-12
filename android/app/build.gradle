@@ -133,6 +133,7 @@ android {
         applicationId "com.sochat"
         minSdkVersion 16
         targetSdkVersion 28
+        multiDexEnabled true
         versionCode project.env.get("ANDROID_VERSION_CODE").toInteger()
         versionName project.env.get("ANDROID_VERSION_NAME")
     }
