@@ -1,173 +1,126 @@
-import _ from 'lodash';
+import _, { toArray } from 'lodash';
 import firebase from 'firebase';
-import React, {Component} from 'react';
+import React, {useEffect, useState} from 'react';
 import geolocation from '@react-native-community/geolocation';
 import {SafeAreaView, StyleSheet, FlatList, AppState} from 'react-native';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
 
-class Messages extends Component {
-  state = {
-    users: [],
-    filtered: [],
-    messages: [],
-    messagesUser: [],
-    updateCurrentLocation: [],
-    appState: AppState.currentState,
+const Messages = () => {
+  const [user, setUser] = useState({});
+  const [query, setQuery] = useState('');
+  const [persons, setPersons] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [messagesUser, setMessagesUser] = useState([]);
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  useEffect(() => {
+    setUser(firebase.auth().currentUser);
+    AppState.addEventListener('change', _handleAppStateChange);
+
+    return(() => {
+      AppState.removeEventListener('change', _handleAppStateChange);
+    })
+  }, [])
+  
+  useEffect(() => {
+    getMessages();
+    setGeolocation();
+  }, [user])
+
+  useEffect(() => {
+    if(toArray(messages).length) getPerson();
+  }, [messages])
+
+  useEffect(() => {
+    if(persons.length) getMessage();
+  }, [persons])
+
+  useEffect(() => {
+    handleFilterPersons()
+  }, [query])
+  
+  const _handleAppStateChange = nextAppState => {
+    if(!user) return;
+    if (appState.match(/inactive|background/) && nextAppState === 'active') {
+      setGeolocation('online');
+    } else {
+      setGeolocation(firebase.database.ServerValue.TIMESTAMP)
+    }
+
+    setAppState(nextAppState)
   };
 
-  componentDidMount = async () => {
-    const user = firebase.auth().currentUser;
-    await this.getGeolocation(user);
-    await this.getMessages(user);
-    AppState.addEventListener('change', this._handleAppStateChange);
-  };
+  const setGeolocation = (status = 'online') => {
+    geolocation.getCurrentPosition(position => {
+      const location = {latitude: position.coords.latitude, longitude: position.coords.longitude};
+      if(user.uid) firebase.database().ref(`users/${user.uid}`).update({location, status});      
+    });    
+  }
 
-  getGeolocation = user => {
-    firebase
-      .database()
-      .ref('users/' + user.uid)
-      .once('value', val => {
-        if (val.val()) {
-          let users = val.val()[Object.keys(val.val())];
-          geolocation.getCurrentPosition(position => {
-            let location = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            };
-
-            firebase
-              .database()
-              .ref('users/' + users.uid + '/' + Object.keys(val.val()))
-              .update({location: location, status: 'online'});
-          });
-        }
-      });
-  };
-
-  getMessages = user => {
-    firebase
-      .database()
-      .ref('messages/' + user.uid)
-      .on('value', message => {
-        if (message.val())
-          Object.keys(message.val()).map(key => {
-            firebase
-              .database()
-              .ref('users/' + key)
-              .on('value', person => {
-                if (person.val())
-                  this.getMessage(user, person.val(), message.val());
-              });
-          });
-      });
-  };
-
-  getMessage = (user, person, messages) => {
-    let message = messages[person.user.uid];
-    let lastMessage = Object.keys(message).length - 1;
-    let uniqMessage = message[Object.keys(message)[lastMessage]];
-
-    this.setState(prevState => {
-      if (uniqMessage.from === user.uid) {
-        let messagesUser = [
-          ...prevState.messagesUser,
-          {
-            uid: person.user.uid,
-            name: person.user.name,
-            photo: person.user.photo,
-            message: uniqMessage,
-          },
-        ];
-        return {
-          messagesUser,
-        };
-      }
+  const getMessages = () => {
+    const messagesRef = firebase.database().ref(`messages/${user.uid}`);
+    messagesRef.on('value', messages => {
+      if(messages.val()) setMessages(messages.val());
     });
   };
 
-  _handleAppStateChange = nextAppState => {
-    let user = firebase.auth().currentUser;
-    if (user) {
-      if (
-        this.state.appState.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .once('value', val => {
-            let users = val.val()[Object.keys(val.val())];
-
-            geolocation.getCurrentPosition(position => {
-              let location = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-              };
-
-              firebase
-                .database()
-                .ref('users/' + users.uid + '/' + Object.keys(val.val()))
-                .update({location: location, status: 'online'});
-            });
-          });
-      } else {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .once('value', val => {
-            let users = val.val()[Object.keys(val.val())];
-            geolocation.getCurrentPosition(position => {
-              let location = {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                }
-
-              firebase
-                .database()
-                .ref('users/' + users.uid + '/' + Object.keys(val.val()))
-                .update({
-                  location: location,
-                  status: firebase.database.ServerValue.TIMESTAMP,
-                });
-              })
-          });
-      }
-      this.setState({appState: nextAppState});
-    }
-  };
-
-  handleSearch = async searched => {
-    let filtered = _.filter(this.state.messagesUser, obj =>
-      _.startsWith(obj.name, searched),
-    );
-    await this.setState({filtered});
-  };
-
-  renderMessageUsers = data => {
-    return <Card screen="chat" item={data.item} screen="messages" />;
-  };
-
-  render() {
-    let newestMessage = this.state.filtered.length
-      ? _.orderBy(this.state.filtered, e => e.message.time, ['desc'])
-      : _.orderBy(this.state.messagesUser, e => e.message.time, ['desc']);
-    let uniqMessage = _.uniqBy(newestMessage, 'uid');
-
-    return (
-      <SafeAreaView style={styles.container}>
-        <Search onSearch={this.handleSearch} />
-        {this.state.messagesUser ? (
-          <FlatList
-            keyExtractor={data => data.name}
-            data={uniqMessage}
-            renderItem={this.renderMessageUsers}
-          />
-        ) : null}
-      </SafeAreaView>
-    );
+  const getPerson = () => {
+    const messageKeys = Object.keys(messages);
+    messageKeys.map(key => {
+      firebase.database().ref(`users/${key}`).on('value', person => {
+        if(person.val().uid) setPersons([...persons, person.val()]);
+      });
+    });
   }
+
+  const getMessage = () => {
+    persons.map(person => {
+      const personMessage = messages[person.uid];
+      const indexOfLastMessage = Object.keys(personMessage).length - 1;
+      const lastMessage = personMessage[Object.keys(personMessage)[indexOfLastMessage]];
+  
+      if (lastMessage.from !== user.uid) return;
+  
+      setMessagesUser([...messagesUser, {
+        uid: person.uid,
+        name: person.name,
+        photo: person.photo,
+        message: lastMessage,
+      }]);  
+    })
+  }
+
+  const handleFilterPersons = () => {
+    const filtered = messagesUser.filter(person => (person.name).toLowerCase().includes(query.toLowerCase()) && person.uid !== user.uid);
+    setFiltered(filtered);
+  }
+
+  const chatList = () => {
+    console.log('messages user', messagesUser)
+    if(!messagesUser.length) return;
+    const newestMessage = _.orderBy((filtered.length || query.length) ? filtered : messagesUser, e => e.message.time, ['desc']);
+    const uniqMessage = _.uniqBy(newestMessage, 'uid');
+
+    return(
+      <FlatList
+        keyExtractor={data => data.name}
+        data={uniqMessage}
+        renderItem={data => (
+          <Card screen="chat" item={data.item} screen="messages" />
+        )}
+      />
+    )
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Search onSearch={setQuery} />
+      {chatList()}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
