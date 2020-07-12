@@ -49,12 +49,16 @@ const Card = props => {
         setVisible(!visible)
     }
 
+    const userAvatar = {uri: item.photo};
+    const defaultAvatar = require('../assets/icons/icon_avatar.png');
+    const avatar = item.photo ? userAvatar : defaultAvatar;
+
     if(item && screen === 'friends'){
         return (
             <View style={styles.card}>
                 <TouchableOpacity onPress={() => setVisible(true)}>
                     <View style={styles.cardImageContainer}>
-                        <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
+                        <Image source={avatar} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.cardTextContainer}>
@@ -65,18 +69,20 @@ const Card = props => {
                         <Text>{item.myStatus}</Text>
                     </View>
                 </View>
-                <View style={styles.cardIconLocationContainer}>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('Map', {show: 'friend', friend: item})}>
-                        <Image source={require('../assets/icons/location.png')} style={styles.cardIconLocation} />
-                    </TouchableOpacity>
-                </View>
+                {item.location && 
+                    <View style={styles.cardIconLocationContainer}>
+                        <TouchableOpacity onPress={() => props.navigation.navigate('Map', {show: 'friend', friend: item})}>
+                            <Image source={require('../assets/icons/location.png')} style={styles.cardIconLocation} />
+                        </TouchableOpacity>
+                    </View>
+                }
 
                 {/* Modal */}
                 <Modal visible={visible} animationType='fade' transparent>
                     <View style={ styles.modalContainer }>
                         <View style={ styles.modalChildContainer }>
                             <View style={ styles.modalImageContainer }>
-                                <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={ styles.modalImage } />
+                                <Image source={avatar} style={ styles.modalImage } />
                             </View>
                             <TouchableOpacity onPress={closeModal} style={ styles.modalIconContainer }>
                                 <Image source={require('../assets/icons/cancel.png')} style={ styles.modalIcon } />
@@ -98,7 +104,7 @@ const Card = props => {
         return (
             <View style={styles.card}>
                 <View style={styles.cardImageContainer}>
-                    <Image source={{ uri: (item.photo) ? item.photo : 'https://imgur.com/CJfr5uM.png' }} style={ styles.cardImage } />
+                    <Image source={avatar} style={ styles.cardImage } />
                 </View>
                 <View style={styles.cardTextContainer}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
