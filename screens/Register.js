@@ -43,7 +43,7 @@ const Register = props => {
     
     const processRegister = () => {
         firebase.auth().createUserWithEmailAndPassword(email, password).then(res => {
-            firebase.database().ref('users').child(res.user.uid).push({
+            firebase.database().ref('users').child(res.user.uid).set({
                 uid: res.user.uid,
                 name: name,
                 status: 'online'
