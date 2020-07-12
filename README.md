@@ -30,9 +30,10 @@ SoChat is a app chat with your friends
 1. Open your terminal or command prompt
 2. Type `git clone https://github.com/areydras/so-chat.git`
 3. Open the folder and type `npm install` for install dependencies
-4. Set key.js.example from firebase
-5. Add Google Cloud Platform api key on `/android/app/src/main/AndroidManifest.xml`
-6. Type `react-native run-android` for run this app. ***Make sure your device is connected with debugging mode***.
+4. Set value of .env.example from firebase and google cloud platform api key
+5. change file name .env.exampe to .env
+6. Add Google Cloud Platform api key on `/android/app/src/main/AndroidManifest.xml`
+7. Type `react-native run-android` for run this app. ***Make sure your device is connected with debugging mode***.
 
 
 ## Screenshots
