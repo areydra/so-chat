@@ -19,6 +19,7 @@
     "native-base": "^2.13.8",
     "react": "16.9.0",
     "react-native": "0.61.2",
+    "react-native-config": "^1.2.1",
     "react-native-gesture-handler": "^1.4.1",
     "react-native-image-picker": "^1.1.0",
     "react-native-maps": "git+https://git@github.com/react-native-community/react-native-maps.git",

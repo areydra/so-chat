@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 import com.android.build.OutputFile
 
@@ -129,10 +130,10 @@ android {
 
     defaultConfig {
         applicationId "com.sochat"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 16
+        targetSdkVersion 28
+        versionCode project.env.get("ANDROID_VERSION_CODE").toInteger()
+        versionName project.env.get("ANDROID_VERSION_NAME")
     }
     splits {
         abi {
