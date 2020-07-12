@@ -23,10 +23,6 @@ if (!firebase.apps.length) { //check if not initialize
 }
 
 
-const App = () => {
-    return (
-    <Router />
-  );
-};
+const App = () => <Router />;
 
 export default App;
