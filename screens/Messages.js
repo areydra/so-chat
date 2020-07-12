@@ -99,7 +99,6 @@ const Messages = () => {
   }
 
   const chatList = () => {
-    console.log('messages user', messagesUser)
     if(!messagesUser.length) return;
     const newestMessage = _.orderBy((filtered.length || query.length) ? filtered : messagesUser, e => e.message.time, ['desc']);
     const uniqMessage = _.uniqBy(newestMessage, 'uid');
