@@ -1,51 +1,57 @@
-import firebase from 'firebase'
-import React, { useEffect } from 'react';
+import firebase from 'firebase';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, View, Text, Dimensions, PermissionsAndroid } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
-const Splash = props => {
-    
+const Splash = ({setIsLoading, setUser}) => {
+    const [permission, setPermission] = useState(null);
+
     useEffect(() => {
         checkPermission()
-    },[])
+    }, [])
 
-    let checkPermission = async() => {
-        let locationPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+    useEffect(() => {
+        if(permission === null) return;
+        handleAfterCheckPermission();
+    }, [permission])
 
-        if(!locationPermission) locationPermission = await requestLocationPermission()
-
-        if(!locationPermission){
-            firebase.auth().signOut()
-            props.navigation.navigate('AuthStack')
-        }else{
-            setTimeout(() => {
-                firebase.auth().onAuthStateChanged(user => {
-                    props.navigation.navigate(user ? 'Swipe' : 'AuthStack')
-                })
-            }, 1000)
-        }
+    const checkPermission = () => {
+        PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(locationPermission => {
+            if(locationPermission){
+                setPermission(true);
+            }else{
+                requestLocationPermission();
+            } 
+        })
     }
 
-    requestLocationPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
-            return granted === PermissionsAndroid.RESULTS.GRANTED
-        } catch (err) {
-            console.warn(err)
-            return false
-        }
+    const requestLocationPermission = () => {
+        PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+            .then(permission => setPermission(permission))
+            .catch(err => console.warn(err));
     };
 
+    const handleAfterCheckPermission = () => {
+        if(permission === PermissionsAndroid.RESULTS.GRANTED){
+            firebase.auth().onAuthStateChanged(user => setUser(user));
+        }else{
+            firebase.auth().signOut();
+            setUser(null);
+        }
+
+        setIsLoading(false);
+    }
+
     return (
-        <SafeAreaView style={styles.brandContainer}>
-            <Text style={styles.brand}>So Chat</Text>
-            <View style={styles.line} />
+        <SafeAreaView style={Styles.brandContainer}>
+            <Text style={Styles.brand}>So Chat</Text>
+            <View style={Styles.line} />
         </SafeAreaView>
     );
 };
 
-const styles = StyleSheet.create({
+const Styles = StyleSheet.create({
     brandContainer: {
         flex: 1,
         justifyContent: 'center',

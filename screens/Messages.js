@@ -108,7 +108,7 @@ const Messages = () => {
         keyExtractor={data => data.name}
         data={uniqMessage}
         renderItem={data => (
-          <Card screen="chat" item={data.item} screen="messages" />
+          <Card screen="chat" item={data.item} screen="messages" navigation={props.navigation}/>
         )}
       />
     )

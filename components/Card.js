@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import moment from 'moment'
 import firebase from 'firebase'
-import { withNavigation } from 'react-navigation'
 import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity, StyleSheet, Modal, View, Text, Dimensions } from 'react-native';
 
@@ -215,4 +214,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default withNavigation(Card);
+export default Card;

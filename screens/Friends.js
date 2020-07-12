@@ -43,7 +43,7 @@ const Friends = ({... props}) => {
                 keyExtractor={item => item.uid}
                 data={(personsHasFiltered.length || query.length) ? personsHasFiltered : persons}
                 renderItem={user => (
-                    <Card item={user.item} screen='friends'/>
+                    <Card item={user.item} screen='friends' navigation={props.navigation}/>
                 )}
             />
         </SafeAreaView>
