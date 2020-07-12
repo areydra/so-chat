@@ -1,106 +1,109 @@
-import firebase from 'firebase'
-import React, { Component } from 'react';
-import MapView, { Marker } from 'react-native-maps'
-import { Thumbnail } from 'native-base'
+import firebase from 'firebase';
+import { Thumbnail } from 'native-base';
+import React, { useState, useEffect } from 'react';
+import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
 
 const { width } = Dimensions.get('window')
 
-class Map extends Component {
-    state = { 
-        users : [],
-        userSelected : [],
-     }
+const Map = ({... props}) => {
+    const [persons, setPersons] = useState([]);
 
-    componentDidMount = () => {
-        this.getUsers()
-    }
+    const user = firebase.auth().currentUser;
+    const { show, person } = props.navigation.state.params;
 
-    getUsers = () => {
-        firebase.database().ref('users').on('child_added', users => {
-            let key = Object.keys(users.val())
-            let data = users.val()
-            let dataUsers = data[key]
+    useEffect(() => {
+        getPersons();
+    }, [])
 
-            if (dataUsers.location !== undefined) {
-                this.setState(prevState => {
-                    return {
-                        users: [...prevState.users, dataUsers]
-                    }
-                })
-            }
+    const getPersons = () => {
+        firebase.database().ref('users').on('child_added', person => {
+            if(person.location === undefined) return;
+            setPersons([...persons, person]);
         })
     }
 
-    render() { 
-        let myLocation = firebase.auth().currentUser
-        const { show, friend } = this.props.navigation.state.params 
-        console.log(friend)
+    const allPersons = () => (
+        <MapView 
+            style={Styles.locationContainer} 
+            zoomControlEnabled={true} 
+            showsUserLocation={true} 
+            followUserLocation={true}
+            region={{
+                latitude: -6.778489,
+                longitude: 107.122118,
+                latitudeDelta: 25,
+                longitudeDelta: 25,
+            }}>
+                {persons.map((person, index) => (
+                    <Marker
+                        key={index}
+                        coordinate={{
+                            latitude: person.location.latitude,
+                            longitude: person.location.longitude
+                        }}
+                        title={person.name}
+                        identifier={person.index}
+                        onCalloutPress={(user.uid !== person.uid) ? () => props.navigation.navigate('Chat', {item: person}) : null}
+                    >
+                        <Thumbnail small source={getAvatar(person)} 
+                            style={{ borderWidth: 2, borderColor: (myLocation.uid === person.uid) ? '#2FAEB2' : (person.status === 'online') ? '#00ff2f' : 'grey' }} 
+                        />
+                    </Marker>
+                ))}
+        </MapView>
+    )
 
-        return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.titleContainer}>
-                    <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-                        <Image source={require('../assets/icons/arrow_back_black.png')} style={styles.arrowBack} />
-                    </TouchableOpacity>
-                    <Text style={styles.title}>{(show === 'all') ? 'All Friends Location' : friend.name + ' Location'}</Text>
-                </View>
-                <View style={styles.locationContainer}>
-                        {
-                            (show === 'all') ?
-                                <MapView style={styles.locationContainer} zoomControlEnabled={true} showsUserLocation={true} followUserLocation={true}
-                                    region={{
-                                        latitude: -6.778489,
-                                        longitude: 107.122118,
-                                        latitudeDelta: 25,
-                                        longitudeDelta: 25,
-                                    }}>
-                                    {this.state.users.map((user, index) => (
-                                        <Marker
-                                            key={index}
-                                            coordinate={{
-                                                latitude: user.location.latitude,
-                                                longitude: user.location.longitude
-                                            }}
-                                            title={user.name}
-                                            identifier={user.index}
-                                            onCalloutPress={(myLocation.uid !== user.uid) ? () => this.props.navigation.navigate('Chat', {item: user}) : null}
-                                        >
-                                            <Thumbnail small source={{ uri: (user.photo) ? user.photo : "https://www.shareicon.net/data/2016/09/01/822711_user_512x512.png" }} 
-                                                style={{ borderWidth: 2, borderColor: (myLocation.uid === user.uid) ? '#2FAEB2' : (user.status === 'online') ? '#00ff2f' : 'grey' }} 
-                                            />
-                                        </Marker>
-                                     ))}
-                                </MapView>
-                            : 
-                                <MapView style={styles.locationContainer} zoomControlEnabled={true} showsUserLocation={true} followUserLocation={true}
-                                    region={{
-                                        latitude: friend.location.latitude,
-                                        longitude: friend.location.longitude,
-                                        latitudeDelta: 0.015,
-                                        longitudeDelta: 0.0121,
-                                    }}>
-                                    <Marker
-                                        coordinate={{
-                                            latitude: friend.location.latitude,
-                                            longitude: friend.location.longitude
-                                        }}
-                                        title={friend.name}
-                                        onCalloutPress={() => this.props.navigation.navigate('Chat', { item: friend })}
-                                    >
-                                        <Thumbnail small source={{ uri: (friend.photo) ? friend.photo : "https://www.shareicon.net/data/2016/09/01/822711_user_512x512.png" }} 
-                                            style={{ borderWidth: 2, borderColor: (friend.status === 'online') ? '#00ff2f' : 'grey' }} 
-                                        />
-                                    </Marker>
-                                </MapView>
-                        }
-                </View>
-            </SafeAreaView>
-        );
+    const specificPerson = () => (
+        <MapView 
+            style={Styles.locationContainer} 
+            zoomControlEnabled={true} 
+            showsUserLocation={true} 
+            followUserLocation={true}
+            region={{
+                latitude: person.location.latitude,
+                longitude: person.location.longitude,
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.0121,
+        }}>
+            <Marker
+                coordinate={{
+                    latitude: person.location.latitude,
+                    longitude: person.location.longitude
+                }}
+                title={person.name}
+                onCalloutPress={() => props.navigation.navigate('Chat', { item: person })}
+            >
+                <Thumbnail small source={getAvatar(person)} 
+                    style={{ borderWidth: 2, borderColor: (person.status === 'online') ? '#00ff2f' : 'grey' }} 
+                />
+            </Marker>
+        </MapView>
+    )
+
+    const getAvatar = person => {
+        const userAvatar = {uri: person.photo};
+        const defaultAvatar = require('../assets/icons/icon_thumbnail.png');
+
+        return person.photo ? userAvatar : defaultAvatar;
     }
+
+    return (
+        <SafeAreaView style={Styles.container}>
+            <View style={Styles.titleContainer}>
+                <TouchableOpacity onPress={() => props.navigation.goBack()}>
+                    <Image source={require('../assets/icons/arrow_back_black.png')} style={Styles.arrowBack} />
+                </TouchableOpacity>
+                <Text style={Styles.title}>{show === 'all' ? 'All Friends Location' : person.name + ' Location'}</Text>
+            </View>
+            <View style={Styles.locationContainer}>
+                {show === 'all' ? allPersons() : specificPerson()}
+            </View>
+        </SafeAreaView>
+    );
 }
 
-const styles = StyleSheet.create({
+const Styles = StyleSheet.create({
     container: {
         flex: 1
     },

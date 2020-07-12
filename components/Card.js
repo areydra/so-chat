@@ -71,7 +71,7 @@ const Card = props => {
                 </View>
                 {item.location && 
                     <View style={styles.cardIconLocationContainer}>
-                        <TouchableOpacity onPress={() => props.navigation.navigate('Map', {show: 'friend', friend: item})}>
+                        <TouchableOpacity onPress={() => props.navigation.navigate('Map', {person: item})}>
                             <Image source={require('../assets/icons/location.png')} style={styles.cardIconLocation} />
                         </TouchableOpacity>
                     </View>
