@@ -1,9 +1,8 @@
 import firebase from 'firebase';
 import RNFetchBlob from 'rn-fetch-blob';
-import React, {Component} from 'react';
+import React, {useState, useEffect} from 'react';
 import ImagePicker from 'react-native-image-picker';
 import {
-  SafeAreaView,
   Image,
   TouchableOpacity,
   Alert,
@@ -18,41 +17,53 @@ import {
 
 const {width} = Dimensions.get('window');
 
-class Profile extends Component {
-  state = {
-    user: {
-      uid: '',
-      email: '',
-      name: '',
-    },
-    text: '',
-    error: '',
-  };
+const Profile = ({}) => {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [myStatus, setMyStatus] = useState('');
+  const [password, setPassword] = useState('');  
+  const [error, setError] = useState('');
+  const [permission, setPermission] = useState(false);
+  const [user, setUser] = useState({uid: '', email: '', name: ''});
 
-  componentDidMount = async () => {
-    await this.getUser();
-  };
+  const userAvatar = {uri: user.photo}
+  const defaultAvatar = require('../assets/icons/icon_avatar.png');
+  const avatar = user.photo ? userAvatar : defaultAvatar;
 
-  requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.requestMultiple([
+  useEffect(() => {
+    getUser();
+    checkPermission();
+  }, [])
+
+  const checkPermission = () => {
+    let checkPermissionCamera = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
+    let checkPermissionReadExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+    let checkPermissionWriteExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+    let permission = checkPermissionCamera && checkPermissionReadExternalStorage && checkPermissionWriteExternalStorage;
+
+    setPermission(permission);
+  }
+
+  const requestPermission = () => {
+      PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.CAMERA,
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      ]);
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      return false;
-    }
+      ])
+      .then(status => {
+        if(status === PermissionsAndroid.RESULTS.GRANTED) setPermission(true);
+      })
   };
 
-  changeImage = async () => {
-    const Blob = RNFetchBlob.polyfill.Blob;
+  const changeImage = () => {
+    if(!permission) return requestPermission();
+
     const fs = RNFetchBlob.fs;
+    const Blob = RNFetchBlob.polyfill.Blob;
     const user = firebase.auth().currentUser;
 
-    window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
     window.Blob = Blob;
+    window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
 
     const options = {
       title: 'Select Profile',
@@ -62,233 +73,138 @@ class Profile extends Component {
       },
       mediaType: 'photo',
     };
+      
+    
+    ImagePicker.showImagePicker(options, image => {
+      let uploadBob = null;
+      const imageRef = firebase.storage().ref('images/' + user.uid);
 
-    let cameraPermission =
-      (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA)) &&
-      PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      ) &&
-      PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      );
-    if (!cameraPermission) {
-      cameraPermission = await this.requestCameraPermission();
-    } else {
-      ImagePicker.showImagePicker(options, response => {
-        let uploadBob = null;
-        const imageRef = firebase.storage().ref('images/' + user.uid);
-        fs.readFile(response.path, 'base64')
-          .then(data => {
-            return Blob.build(data, {type: `${response.mime};BASE64`});
-          })
-          .then(blob => {
-            uploadBob = blob;
-            return imageRef.put(blob, {contentType: `${response.mime}`});
-          })
-          .then(() => {
-            uploadBob.close();
-            return imageRef.getDownloadURL();
-          })
-          .then(url => {
-            firebase
-              .database()
-              .ref('users/' + user.uid)
-              .once('value', val => {
-                if (val.val()) {
-                  let updateUser = {
-                      photo: url,
-                  };
-                  firebase
-                    .database()
-                    .ref('users/' + user.uid + '/' + Object.keys(val.val()))
-                    .update({...updateUser});
-                }
-              });
-          })
-          .catch(err => console.log(err));
-      });
-    }
-  };
-
-  getUser = () => {
-    let user = firebase.auth().currentUser;
-    if (user)
-      firebase
-        .database()
-        .ref('users/' + user.uid)
-        .on('value', res => {
-          if (res.val()) {
-            let key = Object.keys(res.val());
-            let data = res.val();
-            let dataUser = {
-              ...data[key],
-              email: user.email,
-            };
-            this.setState({user: dataUser});
-          }
-        });
-  };
-
-  handleSignOut = () => {
-    let user = firebase.auth().currentUser;
-    firebase
-      .auth()
-      .signOut()
-      .then(() => {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .once('value', val => {
-            let users = val.val()[Object.keys(val.val())];
-            firebase
-              .database()
-              .ref('users/' + users.uid + '/' + Object.keys(val.val()))
-              .update({
-                status: firebase.database.ServerValue.TIMESTAMP,
-              });
-          });
-
-        this.props.navigation.navigate('AuthStack');
-      });
-  };
-
-  updateData = update => {
-    let user = firebase.auth().currentUser;
-    if (user)
-      firebase
-        .database()
-        .ref('users/' + user.uid)
-        .once('value')
-        .then(res => {
-          if (res.val()) {
-            let newData = {};
-            if (update === 'name') {
-              if (this.state.text.length > 4) {
-                newData = {
-                  name: this.state.text,
-                };
-              }
-            } else if (update === 'myStatus') {
-              newData = {
-                myStatus: this.state.text,
-              };
-            } else if (update === 'phone') {
-              newData = {
-                phone: this.state.text,
-              };
-            }
-
-            firebase
-              .database()
-              .ref(
-                'users/' + this.state.user.uid + '/' + Object.keys(res.val()),
-              )
-              .update({...newData});
-            this.setState({text: ''});
-          }
-        });
-  };
-
-  updatePassword = () => {
-    if (this.state.text.length > 5) {
-      firebase
-        .auth()
-        .currentUser.updatePassword(this.state.text)
+      fs.readFile(image.path, 'base64')
+        .then(data => Blob.build(data, {type: `${image.mime};BASE64`}))
+        .then(blob => {
+          uploadBob = blob;
+          return imageRef.put(blob, {contentType: `${image.mime}`});
+        })
         .then(() => {
-          Alert.alert(
-            'Success', //title
-            'Password has been updated', //message or description
-            //button dengan text: '', lalu style:'', onPress: ketika di pencet/klik jalankan function reset
-            [{text: 'Close', style: 'destructive'}],
-          );
-        });
-      this.setState({text: ''});
-    } else if (this.state.text.length > 0) {
-      this.setState({error: 'Password must be 6 character'});
-      this.setState({text: ''});
-    } else {
-      this.setState({text: ''});
-    }
+          uploadBob.close();
+          return imageRef.getDownloadURL();
+        })
+        .then(url => firebase.database().ref(`users/${user.uid}`).update({photo: url}))
+        .catch(err => console.log(err));
+    });  
   };
 
-  render() {
-    const {uid, email, name, phone, photo, myStatus} = this.state.user;
-    if (uid !== null) {
-      return (
-        <SafeAreaView style={styles.container}>
-          <ScrollView>
-            <TouchableOpacity onPress={this.changeImage}>
-              <View style={styles.imageProfile}>
-                <Image
-                  source={{uri: photo ? photo : 'https://imgur.com/CJfr5uM'}}
-                  style={{width: '100%', height: '100%', resizeMode: 'cover'}}
-                />
-                <Image
-                  source={require('../assets/icons/photo_camera.png')}
-                  style={{
-                    height: 20,
-                    width: 20,
-                    position: 'absolute',
-                    bottom: 5,
-                    left: 50,
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-            <View style={styles.containerNameStatus}>
-              <TextInput
-                style={styles.name}
-                onChangeText={text => this.setState({text})}
-                onSubmitEditing={() => this.updateData('name')}
-                defaultValue={
-                  name.length > 25 ? name.substr(0, 25) + '...' : name
-                }
-              />
-              <TextInput
-                style={styles.status}
-                defaultValue={myStatus}
-                placeholder="Add status"
-                onChangeText={text => this.setState({text})}
-                onSubmitEditing={() => this.updateData('myStatus')}
-              />
-            </View>
-            <View style={styles.dataContainer}>
-              <Text style={styles.data}>{email}</Text>
-              <TextInput
-                style={styles.data}
-                defaultValue={phone}
-                placeholder="Phone number"
-                keyboardType="number-pad"
-                onChangeText={text => this.setState({text})}
-                onSubmitEditing={() => this.updateData('phone')}
-              />
-              {this.state.error.length ? (
-                <Text style={styles.textError}>{this.state.error}</Text>
-              ) : null}
-              <TextInput
-                style={styles.data}
-                placeholder="Type here for change password"
-                defaultValue={this.state.text}
-                secureTextEntry={true}
-                onChangeText={text => this.setState({text, error: ''})}
-                onSubmitEditing={() => this.updatePassword()}
-              />
-            </View>
-            <TouchableOpacity onPress={this.handleSignOut}>
-              <View style={styles.button}>
-                <Text style={styles.buttonText}>Logout</Text>
-              </View>
-            </TouchableOpacity>
-          </ScrollView>
-        </SafeAreaView>
-      );
-    } else {
-      return <Text>Loading.....</Text>;
-    }
+  const getUser = () => {
+    let user = firebase.auth().currentUser;
+    firebase.database().ref(`users/${user.uid}`).once('value').then(res => setUser({uid: user.uid, email: user.email, ...res.val()}));
+  };
+
+  const handleSignOut = () => {
+    firebase.auth().signOut().then(() => updateStatusUser());
+  };
+
+  const updateStatusUser = () => {
+    let status = firebase.database.ServerValue.TIMESTAMP; 
+    firebase.database().ref(`users/${user.uid}`).update({status}).then(() =>{
+      navigateToAuthStack();
+    });
   }
+
+  const navigateToAuthStack = () => props.navigation.navigate('AuthStack');
+
+  const updateName = () => {
+    if(name.length < 4) return;
+
+    firebase.database().ref(`users/${user.uid}`).update({name});
+    setName('');
+  }
+
+  const updateMyStatus = () => {
+    if(!myStatus.length) return;
+
+    firebase.database().ref(`users/${user.uid}`).update({myStatus});
+    setMyStatus('');
+  }
+
+  const updatePhone = () => {
+    if(!phone.length) return;
+
+    firebase.database().ref(`users/${user.uid}`).update({phone});
+    setPhone('');
+  }  
+ 
+  const updatePassword = () => {
+    if(password.length < 6) return setError('Password must be 6 character');
+
+    firebase.auth().currentUser.updatePassword(password).then(() => alertPasswordSuccessUpdated());
+    setPassword('');
+  };
+
+  const alertPasswordSuccessUpdated = () => {
+    Alert.alert(
+      'Success', 
+      'Password has been updated', 
+      [{text: 'Close', style: 'destructive'}],
+    );
+  }
+
+  if(user.uid === null) return <Text>Loading.....</Text>;
+
+  return (
+    <ScrollView style={Styles.container}>
+      <TouchableOpacity onPress={changeImage}>
+        <View style={Styles.imageProfile}>
+          <Image source={avatar} style={Styles.iconAvatar}/>
+          <Image source={require('../assets/icons/photo_camera.png')} style={Styles.iconCamera}/>
+        </View>
+      </TouchableOpacity>
+      <View style={Styles.containerNameStatus}>
+        <TextInput
+          style={Styles.name}
+          onChangeText={setName}
+          onSubmitEditing={updateName}
+          defaultValue={name.length > 25 ? name.substr(0, 25) + '...' : name}
+        />
+        <TextInput
+          style={Styles.status}
+          defaultValue={user.myStatus}
+          placeholder="Add status"
+          onChangeText={setMyStatus}
+          onSubmitEditing={updateMyStatus}
+        />
+      </View>
+      <View style={Styles.dataContainer}>
+        <Text style={Styles.data}>{user.email}</Text>
+        <TextInput
+          style={Styles.data}
+          defaultValue={user.phone}
+          placeholder="Phone number"
+          keyboardType="number-pad"
+          onChangeText={setPhone}
+          onSubmitEditing={updatePhone}
+        />
+        {error.length ?
+          <Text style={Styles.textError}>{error}</Text>
+        : null}
+        <TextInput
+          style={Styles.data}
+          placeholder="Type here for change password"
+          defaultValue={password}
+          secureTextEntry={true}
+          onChangeText={setPassword}
+          onSubmitEditing={updatePassword}
+        />
+      </View>
+      <TouchableOpacity onPress={handleSignOut}>
+        <View style={Styles.button}>
+          <Text style={Styles.buttonText}>Logout</Text>
+        </View>
+      </TouchableOpacity>
+    </ScrollView>
+  );
 }
 
-const styles = StyleSheet.create({
+const Styles = StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -345,6 +261,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'red',
   },
+  iconAvatar: {
+    width: '100%', 
+    height: '100%', 
+    resizeMode: 'contain',
+  },
+  iconCamera: {
+      height: 20,
+      width: 20,
+      bottom: 0,
+      left: 58,
+      position: 'absolute',
+  }
 });
 
 export default Profile;
