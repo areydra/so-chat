@@ -1,72 +1,56 @@
-import _ from 'lodash'
-import firebase from 'firebase'
-import React, { Component } from 'react';
-import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity, Dimensions } from 'react-native';
+import firebase from 'firebase';
+import _, { toArray } from 'lodash';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
 
-import Card from '../components/Card'
-import Search from '../components/Search'
+import Card from '../components/Card';
+import Search from '../components/Search';
 
-const { width } = Dimensions.get('window')
+const Friends = ({... props}) => {
+    const [query, setQuery] = useState('');
+    const [persons, setPersons] = useState([]);
+    const [personsHasFiltered, setPersonsHasFiltered] = useState([]);
 
-class Friends extends Component {
-    state = { 
-        users : [],
-        friends : [],
-        search : []
-     }
+    const user = firebase.auth().currentUser;
 
-     componentDidMount = async () => {
-        await this.getUser() 
-     }
+    useEffect(() => {
+        getPersons();
+    }, [])
 
-     getUser = () => {
-        firebase.database().ref('users').on('child_added', users => {
-            let key = Object.keys(users.val())
-            let data = users.val()
-            let dataUsers = data[key]
+    useEffect(() => {
+        filterPersons();
+    }, [query])
 
-            this.setState(prevState => {
-                return {
-                    users : [...prevState.users, dataUsers]
-                }
-            })
-        })
-     }
-
-    handleSearch = async (searched) => {
-        let search = _.filter(this.state.users, obj => _.startsWith(obj.name, searched) )
-        await this.setState({ search })
+    const getPersons = () => {
+        firebase.database().ref('users').on('value', persons => {
+            persons = toArray(persons.val()).filter(person => person.uid !== user.uid);
+            setPersons(persons);
+        });
     }
 
-     card = user => {
-         return(
-             <Card item={user.item} screen='friends' />
-         )
-     }
-
-    render() { 
-        const { search, users } = this.state
-        const user     = firebase.auth().currentUser
-        const filtered = (search.length) ? search.filter(person => person.uid !== user.uid) : users.filter(person => person.uid !== user.uid)
-
-        return (
-            <SafeAreaView style={styles.container}>
-                <Search onSearch={this.handleSearch} />
-
-                <TouchableOpacity onPress={ () => this.props.navigation.navigate('Map', { show: 'all' }) }>
-                    <Text style={ styles.showAllFriendsText }>Show all friends location</Text>
-                </TouchableOpacity>
-                <FlatList 
-                    keyExtractor={item => item.uid}
-                    data={filtered}
-                    renderItem={this.card}
-                />
-            </SafeAreaView>
-        );
+    const filterPersons = () => {
+        const personsHasFiltered = persons.filter(person => (person.name).toLowerCase().includes(query.toLowerCase()) && person.uid !== user.uid);
+        setPersonsHasFiltered(personsHasFiltered);
     }
+
+    return (
+        <SafeAreaView style={Styles.container}>
+            <Search onSearch={setQuery} />
+            <TouchableOpacity onPress={ () => props.navigation.navigate('Map', { show: 'all' }) }>
+                <Text style={ Styles.showAllFriendsText }>Show all friends location</Text>
+            </TouchableOpacity>
+            <FlatList 
+                keyExtractor={item => item.uid}
+                data={(personsHasFiltered.length || query.length) ? personsHasFiltered : persons}
+                renderItem={user => (
+                    <Card item={user.item} screen='friends'/>
+                )}
+            />
+        </SafeAreaView>
+    );
 }
 
-const styles = StyleSheet.create({
+const Styles = StyleSheet.create({
     container: {
         flex: 1
     },
@@ -74,7 +58,7 @@ const styles = StyleSheet.create({
         color: '#F15249', 
         textAlign: 'right', 
         fontWeight: 'bold',
-        marginHorizontal: width / 30
+        marginHorizontal: 20
     }
 });
 
