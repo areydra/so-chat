@@ -2,6 +2,7 @@ import firebase from 'firebase';
 import _, { toArray } from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
@@ -10,18 +11,30 @@ const Friends = ({... props}) => {
     const [query, setQuery] = useState('');
     const [persons, setPersons] = useState([]);
     const [personsHasFiltered, setPersonsHasFiltered] = useState([]);
+    const [user, setUser] = useState(null);
 
-    const user = firebase.auth().currentUser;
+    useEffect(() => {
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+        return subscriber;
+    }, []);
 
     useEffect(() => {
         getPersons();
-    }, [])
+    }, [user])
 
     useEffect(() => {
         filterPersons();
     }, [query])
 
+    const onAuthStateChanged = (user) => {
+        setUser(user);
+    }
+
     const getPersons = () => {
+        if (!user) {
+            return;
+        }
+        
         firebase.database().ref('users').on('value', persons => {
             persons = toArray(persons.val()).filter(person => person.uid !== user.uid);
             setPersons(persons);

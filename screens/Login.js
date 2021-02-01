@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, TouchableOpacity, StyleSheet, Keyboard, View, Text, TextInput, Dimensions, PermissionsAndroid, Alert } from 'react-native';
-import firebase from 'firebase'
+import auth from '@react-native-firebase/auth'
 
 const { width } = Dimensions.get('window')
 
@@ -30,8 +30,7 @@ const Login = props => {
     }
 
     const processLogin = () => {
-        firebase.auth().signInWithEmailAndPassword(email, password).then(user => {
-        }).catch(err => {
+        auth().signInWithEmailAndPassword(email, password).catch(err => {
             setPassword('')
             setErrorMessage(err.message)
         })

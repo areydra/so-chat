@@ -3,18 +3,28 @@ import { Thumbnail } from 'native-base';
 import React, { useState, useEffect } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window')
 
 const Map = ({... props}) => {
     const [persons, setPersons] = useState([]);
+    const [user, setUser] = useState(null);
 
-    const user = firebase.auth().currentUser;
     const { show, person } = props.navigation.state.params;
 
     useEffect(() => {
-        getPersons();
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+        return subscriber;
     }, [])
+
+    useEffect(() => {
+        getPersons();
+    }, [user])
+
+    const onAuthStateChanged = (user) => {
+        setUser(user);
+    }
 
     const getPersons = () => {
         firebase.database().ref('users').on('child_added', person => {
@@ -44,7 +54,7 @@ const Map = ({... props}) => {
                         }}
                         title={person.name}
                         identifier={person.index}
-                        onCalloutPress={(user.uid !== person.uid) ? () => props.navigation.navigate('Chat', {item: person}) : null}
+                        onCalloutPress={(user?.uid !== person.uid) ? () => props.navigation.navigate('Chat', {item: person}) : null}
                     >
                         <Thumbnail small source={getAvatar(person)} 
                             style={{ borderWidth: 2, borderColor: (myLocation.uid === person.uid) ? '#2FAEB2' : (person.status === 'online') ? '#00ff2f' : 'grey' }} 

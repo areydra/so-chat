@@ -1,6 +1,6 @@
-import firebase from 'firebase';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, View, Text, Dimensions, PermissionsAndroid } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window')
 
@@ -9,6 +9,7 @@ const Splash = ({setIsLoading, setUser}) => {
 
     useEffect(() => {
         checkPermission()
+        return checkPermission()
     }, [])
 
     useEffect(() => {
@@ -34,9 +35,9 @@ const Splash = ({setIsLoading, setUser}) => {
 
     const handleAfterCheckPermission = () => {
         if(permission === PermissionsAndroid.RESULTS.GRANTED){
-            firebase.auth().onAuthStateChanged(user => setUser(user));
+            auth().onAuthStateChanged(user => setUser(user));
         }else{
-            firebase.auth().signOut();
+            auth().signOut();
             setUser(null);
         }
 

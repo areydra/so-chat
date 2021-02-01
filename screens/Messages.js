@@ -3,12 +3,13 @@ import firebase from 'firebase';
 import React, {useEffect, useState} from 'react';
 import geolocation from '@react-native-community/geolocation';
 import {SafeAreaView, StyleSheet, FlatList, AppState} from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
 
 const Messages = () => {
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(null);
   const [query, setQuery] = useState('');
   const [persons, setPersons] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -17,15 +18,20 @@ const Messages = () => {
   const [appState, setAppState] = useState(AppState.currentState);
 
   useEffect(() => {
-    setUser(firebase.auth().currentUser);
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     AppState.addEventListener('change', _handleAppStateChange);
 
     return(() => {
+      subscriber;
       AppState.removeEventListener('change', _handleAppStateChange);
     })
   }, [])
-  
+
   useEffect(() => {
+    if (!user) {
+      return;
+    }
+
     getMessages();
     setGeolocation();
   }, [user])
@@ -41,7 +47,11 @@ const Messages = () => {
   useEffect(() => {
     handleFilterPersons()
   }, [query])
-  
+
+  const onAuthStateChanged = (user) => {    
+    setUser(user);
+  }
+
   const _handleAppStateChange = nextAppState => {
     if(!user) return;
     if (appState.match(/inactive|background/) && nextAppState === 'active') {

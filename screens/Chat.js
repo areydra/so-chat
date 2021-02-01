@@ -2,6 +2,7 @@ import moment from 'moment'
 import firebase from 'firebase'
 import React, { Component } from 'react';
 import { SafeAreaView, FlatList, Image, TouchableOpacity, StyleSheet, View, Text, TextInput, Dimensions } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window')
 
@@ -10,31 +11,53 @@ class Chat extends Component {
         text : '',
         myUid : '',
         status: null,
-        messages : []
-     }
+        messages : [],
+        user: null,
+        initializing: true,
+    }
 
-     componentDidMount = () => {
-         this.getMessage()
-         this.getStatus()
-     }
+    componentDidMount = () => {
+        this.getUser();
+    }
 
-     getMessage = () => {
-         let user = firebase.auth().currentUser
-         const { uid } = this.props.navigation.state.params.item
+    componentWillUnmount = () => {
+        this.getUser();
+    }
 
-         firebase.database().ref('messages/').child(user.uid).child(uid).on('child_added', newMessage => {
-             this.setState(prevState => {
-                 return {
-                     messages: [...prevState.messages.reverse(), newMessage.val()].reverse()
-                 }
-             })
-         })
-     }
+    componentDidUpdate = (prevProps, prevState) => {
+        if (!this.state.initializing && this.state.user) {
+            this.getMessage();
+            this.getStatus();
+        }
+    }
+
+    getUser = () => {
+        auth().onAuthStateChanged(this.onAuthStateChanged);
+    }
+
+    onAuthStateChanged = (user) => {
+        if (this.state.initializing) {
+            this.setState({initializing: false});
+        }
+
+        this.setState({user});
+    }
+
+    getMessage = () => {
+        const { uid } = this.props.navigation.state.params.item;
+
+        firebase.database().ref('messages/').child(this.state.user.uid).child(uid).on('child_added', newMessage => {
+            this.setState(prevState => {
+                return {
+                    messages: [...prevState.messages.reverse(), newMessage.val()].reverse()
+                }
+            })
+        })
+    }
 
     handleSendMessage = () => {
         const updates = {}
-        const { text } = this.state
-        const user     = firebase.auth().currentUser
+        const { text, user } = this.state
         const { uid }  = this.props.navigation.state.params.item
 
         if(text.length){
@@ -72,9 +95,8 @@ class Chat extends Component {
     };
 
     renderMessage = data => {
-        let user = firebase.auth().currentUser
         return(
-            (data.item.from !== user.uid) ?
+            (data.item.from !== this.state.user?.uid) ?
                 <View style={styles.messageFriendContainer}>
                     <Text style={ styles.messageFriend }>{data.item.message} </Text>
                     <Text style={ styles.messageFriendTime }>{this.convertTime(data.item.time)}</Text>

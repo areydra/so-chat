@@ -3,21 +3,33 @@ import moment from 'moment'
 import firebase from 'firebase'
 import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity, StyleSheet, Modal, View, Text, Dimensions } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window')
 
-const Card = props => {
-    const [visible, setVisible] = useState(false)
-    const [lastMessage, setLastMessage] = useState([])
-
-    const { item, screen } = props
-    const user = firebase.auth().currentUser
+const Card = ({item, screen}) => {
+    const [visible, setVisible] = useState(false);
+    const [lastMessage, setLastMessage] = useState([]);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        getLastMessage()
+        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+        return subscriber;
     }, [])
 
+    useEffect(() => {
+        getLastMessage();
+    }, [user])
+
+    const onAuthStateChanged = (user) => {
+        setUser(user);
+    }
+
     const getLastMessage = async() => {
+        if (!user) {
+            return;
+        }
+        
         let person = item
 
         await firebase.database().ref('messages/' + user.uid).on('value', message => {      

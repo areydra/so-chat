@@ -14,6 +14,7 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const {width} = Dimensions.get('window');
 
@@ -31,8 +32,10 @@ const Profile = ({}) => {
   const avatar = user.photo ? userAvatar : defaultAvatar;
 
   useEffect(() => {
-    getUser();
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     checkPermission();
+
+    return subscriber;
   }, [])
 
   const checkPermission = () => {
@@ -60,7 +63,6 @@ const Profile = ({}) => {
 
     const fs = RNFetchBlob.fs;
     const Blob = RNFetchBlob.polyfill.Blob;
-    const user = firebase.auth().currentUser;
 
     window.Blob = Blob;
     window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
@@ -94,13 +96,12 @@ const Profile = ({}) => {
     });  
   };
 
-  const getUser = () => {
-    let user = firebase.auth().currentUser;
+  const onAuthStateChanged = (user) => {
     firebase.database().ref(`users/${user.uid}`).once('value').then(res => setUser({uid: user.uid, email: user.email, ...res.val()}));
   };
 
   const handleSignOut = () => {
-    firebase.auth().signOut().then(() => updateStatusUser());
+    auth().signOut().then(() => updateStatusUser());
   };
 
   const updateStatusUser = () => {
@@ -136,7 +137,7 @@ const Profile = ({}) => {
   const updatePassword = () => {
     if(password.length < 6) return setError('Password must be 6 character');
 
-    firebase.auth().currentUser.updatePassword(password).then(() => alertPasswordSuccessUpdated());
+    auth().currentUser.updatePassword(password).then(() => alertPasswordSuccessUpdated());
     setPassword('');
   };
 
