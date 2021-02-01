@@ -1,9 +1,9 @@
-import firebase from 'firebase';
 import { Thumbnail } from 'native-base';
 import React, { useState, useEffect } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 const { width } = Dimensions.get('window')
 
@@ -27,7 +27,7 @@ const Map = ({... props}) => {
     }
 
     const getPersons = () => {
-        firebase.database().ref('users').on('child_added', person => {
+        database().ref('users').on('child_added', person => {
             if(person.location === undefined) return;
             setPersons([...persons, person]);
         })

@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import moment from 'moment'
-import firebase from 'firebase'
 import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity, StyleSheet, Modal, View, Text, Dimensions } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 const { width } = Dimensions.get('window')
 
@@ -32,7 +32,7 @@ const Card = ({item, screen}) => {
         
         let person = item
 
-        await firebase.database().ref('messages/' + user.uid).on('value', message => {      
+        await database().ref('messages/' + user.uid).on('value', message => {      
             if(message.val()){
                 let messages = message.val()[person.uid]
                 if(messages){

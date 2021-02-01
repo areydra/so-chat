@@ -1,9 +1,9 @@
 import _, { toArray } from 'lodash';
-import firebase from 'firebase';
 import React, {useEffect, useState} from 'react';
 import geolocation from '@react-native-community/geolocation';
 import {SafeAreaView, StyleSheet, FlatList, AppState} from 'react-native';
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
@@ -57,7 +57,7 @@ const Messages = () => {
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
       setGeolocation('online');
     } else {
-      setGeolocation(firebase.database.ServerValue.TIMESTAMP)
+      setGeolocation(database.ServerValue.TIMESTAMP)
     }
 
     setAppState(nextAppState)
@@ -66,12 +66,12 @@ const Messages = () => {
   const setGeolocation = (status = 'online') => {
     geolocation.getCurrentPosition(position => {
       const location = {latitude: position.coords.latitude, longitude: position.coords.longitude};
-      if(user.uid) firebase.database().ref(`users/${user.uid}`).update({location, status});      
+      if(user.uid) database().ref(`users/${user.uid}`).update({location, status});      
     });    
   }
 
   const getMessages = () => {
-    const messagesRef = firebase.database().ref(`messages/${user.uid}`);
+    const messagesRef = database().ref(`messages/${user.uid}`);
     messagesRef.on('value', messages => {
       if(messages.val()) setMessages(messages.val());
     });
@@ -80,7 +80,7 @@ const Messages = () => {
   const getPerson = () => {
     const messageKeys = Object.keys(messages);
     messageKeys.map(key => {
-      firebase.database().ref(`users/${key}`).on('value', person => {
+      database().ref(`users/${key}`).on('value', person => {
         if(person.val().uid) setPersons([...persons, person.val()]);
       });
     });

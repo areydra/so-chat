@@ -1,8 +1,8 @@
 import moment from 'moment'
-import firebase from 'firebase'
 import React, { Component } from 'react';
 import { SafeAreaView, FlatList, Image, TouchableOpacity, StyleSheet, View, Text, TextInput, Dimensions } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 const { width } = Dimensions.get('window')
 
@@ -46,7 +46,7 @@ class Chat extends Component {
     getMessage = () => {
         const { uid } = this.props.navigation.state.params.item;
 
-        firebase.database().ref('messages/').child(this.state.user.uid).child(uid).on('child_added', newMessage => {
+        database().ref('messages/').child(this.state.user.uid).child(uid).on('child_added', newMessage => {
             this.setState(prevState => {
                 return {
                     messages: [...prevState.messages.reverse(), newMessage.val()].reverse()
@@ -61,18 +61,18 @@ class Chat extends Component {
         const { uid }  = this.props.navigation.state.params.item
 
         if(text.length){
-            let messageId = firebase.database().ref('messages').child(user.uid).child(uid).push().key
+            let messageId = database().ref('messages').child(user.uid).child(uid).push().key
     
             let message = {
                 message: text,
-                time: firebase.database.ServerValue.TIMESTAMP,
+                time: database.ServerValue.TIMESTAMP,
                 from: user.uid
             }
     
             updates['messages/' + user.uid + '/' + uid + '/' + messageId] = message
             updates['messages/' + uid + '/' + user.uid + '/' + messageId] = message
     
-            firebase.database().ref().update(updates)
+            database().ref().update(updates)
             this.setState({ text: '' })
         }
     }
@@ -111,7 +111,7 @@ class Chat extends Component {
 
     getStatus = () => {
         const { uid } = this.props.navigation.state.params.item
-        firebase.database().ref('users/' + uid).on('child_changed', user => {
+        database().ref('users/' + uid).on('child_changed', user => {
             if (user)
                 this.setState({ status: user.val() })
         })

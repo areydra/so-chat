@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, TouchableOpacity, StyleSheet, View, Text, Keyboard, TextInput, Dimensions, Alert, PermissionsAndroid } from 'react-native';
-import firebase from 'firebase'
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 const { width } = Dimensions.get('window')
 
@@ -44,7 +44,7 @@ const Register = props => {
     
     const processRegister = () => {
         auth().createUserWithEmailAndPassword(email, password).then(res => {
-            firebase.database().ref('users').child(res.user.uid).set({
+            database().ref('users').child(res.user.uid).set({
                 uid: res.user.uid,
                 name: name,
                 status: 'online'

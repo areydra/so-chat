@@ -1,8 +1,8 @@
-import firebase from 'firebase';
 import _, { toArray } from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
@@ -35,7 +35,7 @@ const Friends = ({... props}) => {
             return;
         }
         
-        firebase.database().ref('users').on('value', persons => {
+        database().ref('users').on('value', persons => {
             persons = toArray(persons.val()).filter(person => person.uid !== user.uid);
             setPersons(persons);
         });

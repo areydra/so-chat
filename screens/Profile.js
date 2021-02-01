@@ -15,6 +15,7 @@ import {
   ScrollView,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 
 const {width} = Dimensions.get('window');
 
@@ -91,13 +92,13 @@ const Profile = ({}) => {
           uploadBob.close();
           return imageRef.getDownloadURL();
         })
-        .then(url => firebase.database().ref(`users/${user.uid}`).update({photo: url}))
+        .then(url => database().ref(`users/${user.uid}`).update({photo: url}))
         .catch(err => console.log(err));
     });  
   };
 
   const onAuthStateChanged = (user) => {
-    firebase.database().ref(`users/${user.uid}`).once('value').then(res => setUser({uid: user.uid, email: user.email, ...res.val()}));
+    database().ref(`users/${user.uid}`).once('value').then(res => setUser({uid: user.uid, email: user.email, ...res.val()}));
   };
 
   const handleSignOut = () => {
@@ -105,8 +106,8 @@ const Profile = ({}) => {
   };
 
   const updateStatusUser = () => {
-    let status = firebase.database.ServerValue.TIMESTAMP; 
-    firebase.database().ref(`users/${user.uid}`).update({status}).then(() =>{
+    let status = database.ServerValue.TIMESTAMP; 
+    database().ref(`users/${user.uid}`).update({status}).then(() =>{
       navigateToAuthStack();
     });
   }
@@ -116,21 +117,21 @@ const Profile = ({}) => {
   const updateName = () => {
     if(name.length < 4) return;
 
-    firebase.database().ref(`users/${user.uid}`).update({name});
+    database().ref(`users/${user.uid}`).update({name});
     setName('');
   }
 
   const updateMyStatus = () => {
     if(!myStatus.length) return;
 
-    firebase.database().ref(`users/${user.uid}`).update({myStatus});
+    database().ref(`users/${user.uid}`).update({myStatus});
     setMyStatus('');
   }
 
   const updatePhone = () => {
     if(!phone.length) return;
 
-    firebase.database().ref(`users/${user.uid}`).update({phone});
+    database().ref(`users/${user.uid}`).update({phone});
     setPhone('');
   }  
  
