@@ -1,4 +1,3 @@
-import firebase from 'firebase';
 import RNFetchBlob from 'rn-fetch-blob';
 import React, {useState, useEffect} from 'react';
 import ImagePicker from 'react-native-image-picker';
@@ -16,6 +15,7 @@ import {
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import storage from '@react-native-firebase/storage';
 
 const {width} = Dimensions.get('window');
 
@@ -80,7 +80,7 @@ const Profile = ({}) => {
     
     ImagePicker.showImagePicker(options, image => {
       let uploadBob = null;
-      const imageRef = firebase.storage().ref('images/' + user.uid);
+      const imageRef = storage().ref('images/' + user.uid);
 
       fs.readFile(image.path, 'base64')
         .then(data => Blob.build(data, {type: `${image.mime};BASE64`}))
