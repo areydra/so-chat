@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "464896327632",
+    "firebase_url": "https://so-chat-85ccf.firebaseio.com",
+    "project_id": "so-chat-85ccf",
+    "storage_bucket": "so-chat-85ccf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:464896327632:android:79c1807e7c3fec023d03d5",
+        "android_client_info": {
+          "package_name": "com.sochat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "464896327632-2156v242c1n6iuumt3bqqvvvelf6sdn5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKk_mAF1HdiDsVEnBZtvGAlM-rinTdoO0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "464896327632-2156v242c1n6iuumt3bqqvvvelf6sdn5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
