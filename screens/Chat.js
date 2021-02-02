@@ -7,32 +7,28 @@ import database from '@react-native-firebase/database';
 const { width } = Dimensions.get('window')
 
 class Chat extends Component {
-    state = { 
-        text : '',
-        myUid : '',
-        status: null,
-        messages : [],
-        user: null,
-        initializing: true,
+    constructor(props) {
+        super(props);
+
+        this.state = { 
+            text : '',
+            myUid : '',
+            friendStatus: null,
+            messages : [],
+            initializing: true,
+        };
+
+        this.currentUser = auth().currentUser;
     }
 
     componentDidMount = () => {
-        this.getUser();
+        this.getMessage();
+        this.getStatus();
     }
 
     componentWillUnmount = () => {
-        this.getUser();
-    }
-
-    componentDidUpdate = (prevProps, prevState) => {
-        if (!this.state.initializing && this.state.user) {
-            this.getMessage();
-            this.getStatus();
-        }
-    }
-
-    getUser = () => {
-        auth().onAuthStateChanged(this.onAuthStateChanged);
+        this.getMessage();
+        this.getStatus();
     }
 
     onAuthStateChanged = (user) => {
@@ -44,37 +40,42 @@ class Chat extends Component {
     }
 
     getMessage = () => {
-        const { uid } = this.props.route.params.item;
+        const currentUserUid = this.currentUser?.uid;
+        const friendUid = this.props.route.params?.item?.uid;
+        const canGetMessage = currentUserUid && friendUid;
 
-        database().ref('messages/').child(this.state.user.uid).child(uid).on('child_added', newMessage => {
-            this.setState(prevState => {
-                return {
-                    messages: [...prevState.messages.reverse(), newMessage.val()].reverse()
-                }
-            })
+        if (!canGetMessage) {
+            return;
+        }
+
+        database().ref('messages/').child(currentUserUid).child(friendUid).on('child_added', newMessage => {
+            let messages = [...this.state.messages.reverse(), newMessage.val()].reverse();
+            this.setState({messages});
         })
     }
 
     handleSendMessage = () => {
-        const updates = {}
-        const { text, user } = this.state
-        const { uid }  = this.props.route.params.item
+        const friendUid = this.props.route.params?.item?.uid;
+        const currentUserUid = this.currentUser?.uid;
+        const canUpdateMessage = this.state.text.length && currentUserUid && friendUid;
 
-        if(text.length){
-            let messageId = database().ref('messages').child(user.uid).child(uid).push().key
-    
-            let message = {
-                message: text,
-                time: database.ServerValue.TIMESTAMP,
-                from: user.uid
-            }
-    
-            updates['messages/' + user.uid + '/' + uid + '/' + messageId] = message
-            updates['messages/' + uid + '/' + user.uid + '/' + messageId] = message
-    
-            database().ref().update(updates)
-            this.setState({ text: '' })
+        if (!canUpdateMessage) {
+            return;
         }
+
+        let messages = {};
+        let currentMessage = database().ref('messages').child(currentUserUid).child(friendUid).push();
+        let payloadMessage = {
+            message: this.state.text,
+            time: database.ServerValue.TIMESTAMP,
+            from: currentUserUid
+        };
+
+        messages[`messages/${currentUserUid}/${friendUid}/${currentMessage.key}`] = payloadMessage;
+        messages[`messages/${friendUid}/${currentUserUid}/${currentMessage.key}`] = payloadMessage;
+
+        this.setState({ text: '' });
+        database().ref().update(messages);
     }
 
     convertTime = time => {
@@ -90,73 +91,118 @@ class Chat extends Component {
         return result;
     };
 
-    convertTimeStatus = time => {
-        return moment(time).calendar()
-    };
-
-    renderMessage = data => {
-        return(
-            (data.item.from !== this.state.user?.uid) ?
-                <View style={styles.messageFriendContainer}>
-                    <Text style={ styles.messageFriend }>{data.item.message} </Text>
-                    <Text style={ styles.messageFriendTime }>{this.convertTime(data.item.time)}</Text>
-                </View>
-            :
-                <View style={styles.messageUserContainer}>
-                    <Text style={ styles.messageUser }>{data.item.message} </Text>
-                    <Text style={ styles.messageUserTime }>{this.convertTime(data.item.time)}</Text>
-                </View>
-        )
-    }
-
     getStatus = () => {
-        const { uid } = this.props.route.params.item
-        database().ref('users/' + uid).on('child_changed', user => {
-            if (user)
-                this.setState({ status: user.val() })
-        })
+        const friendUid = this.props.route.params?.item?.uid;
+
+        if (!friendUid) {
+            return;
+        }
+
+        database().ref(`users/${friendUid}`).on('child_changed', user => {
+            if (user.key !== 'status') {
+                return;
+            }
+
+            this.setState({friendStatus: user.val()});
+        });
     }
 
-     render() { 
-        const { name, photo } = this.props.route.params.item
-        const status = (this.state.status === null) ? this.props.route.params.item.status : this.state.status.status
+    getFriendPhotoProfile = () => {
+        const friendPhotoProfile = this.props.route.params?.item?.photo;
+
+        if (!friendPhotoProfile) {
+            return {uri: 'https://imgur.com/CJfr5uM.png'};
+        }
+
+        return {uri: friendPhotoProfile};
+    }
+
+    getFriendName = () => {
+        const friendName = this.props.route.params?.item?.name;
+
+        if (friendName.length > 25){
+            return friendName.substr(0, 25) + '...';
+        }
+
+        return friendName;
+    }
+
+    getFriendStatus = () => {
+        const friendStatus = this.state.friendStatus ?? this.props.route.params?.item?.status;
+
+        if (friendStatus !== 'online') {
+            return moment(this.state.friendStatus).calendar();
+        } 
+
+        return 'Online';
+    }
+
+    renderMessage = (data) => {
+        const {message, time, from} = data.item;
+        const isMessageFromFriend = from !== this.currentUser?.uid;
+
+        if (isMessageFromFriend) {
+            return (
+                <View style={styles.messageFriendContainer}>
+                    <Text style={styles.messageFriend}>{message}</Text>
+                    <Text style={styles.messageFriendTime}>{this.convertTime(time)}</Text>
+                </View>
+            );
+        }
 
         return (
-                 <SafeAreaView style={styles.container}>
-                     <View style={styles.header}>
-                         <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-                             <Image source={require('../assets/icons/arrow_back.png')} style={styles.arrowBack} />
-                         </TouchableOpacity>
-                         <View style={styles.containerImage}>
-                            <Image source={{ uri: (photo) ? photo : 'https://imgur.com/CJfr5uM.png' }} style={ styles.image } />
-                         </View>
-                         <View style={styles.headerNameContainer}>
-                             <Text style={styles.headerName}>{(name.length > 25) ? name.substr(0, 25) + '...' : name}</Text>
-                             <Text>{(status === 'online') ? 'Online' : this.convertTimeStatus(status)}</Text>
-                         </View>
-                     </View>
-                     <View style={styles.messageContainer}>
-                         <FlatList
-                             keyExtractor={data => data.time.toString()}
-                             data={this.state.messages}
-                             renderItem={this.renderMessage}
-                             contentContainerStyle={styles.messageLists}
-                             showsVerticalScrollIndicator={false}
-                             ref="flatList"
-                             inverted
-                         />
-                     </View>
-                     <View style={styles.textInputContainer}>
-                         <TextInput placeholder='Tell me. U love me' style={styles.textInput} 
-                                    onChangeText={text => this.setState({ text })} value={this.state.text} 
-                                    returnKeyType='send' onSubmitEditing={this.handleSendMessage}
-                                    />
-                         <TouchableOpacity onPress={this.handleSendMessage} style={styles.send}>
-                             <Image source={require('../assets/icons/send.png')} />
-                         </TouchableOpacity>
-                     </View>                 
-                 </SafeAreaView>                 
-         );
+            <View style={styles.messageUserContainer}>
+                <Text style={styles.messageUser}>{message}</Text>
+                <Text style={styles.messageUserTime}>{this.convertTime(time)}</Text>
+            </View>
+        );
+    }
+
+    render() { 
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                        <Image 
+                            source={require('../assets/icons/arrow_back.png')} 
+                            style={styles.arrowBack}/>
+                    </TouchableOpacity>
+                    <View style={styles.containerImage}>
+                    <Image 
+                        source={this.getFriendPhotoProfile()} 
+                        style={styles.image}/>
+                    </View>
+                    <View style={styles.headerNameContainer}>
+                        <Text style={styles.headerName}>{this.getFriendName()}</Text>
+                        <Text>{this.getFriendStatus()}</Text>
+                    </View>
+                </View>
+                <View style={styles.messageContainer}>
+                    <FlatList
+                        keyExtractor={data => data.time.toString()}
+                        data={this.state.messages}
+                        renderItem={this.renderMessage}
+                        contentContainerStyle={styles.messageLists}
+                        showsVerticalScrollIndicator={false}
+                        inverted
+                    />
+                </View>
+                <View style={styles.textInputContainer}>
+                    <TextInput 
+                        placeholder='Tell me. U love me' 
+                        style={styles.textInput} 
+                        onChangeText={text => this.setState({text})} 
+                        value={this.state.text} 
+                        returnKeyType='send' 
+                        onSubmitEditing={this.handleSendMessage}/>
+                    <TouchableOpacity 
+                        onPress={this.handleSendMessage} 
+                        style={styles.send}>
+                        <Image source={require('../assets/icons/send.png')} />
+                    </TouchableOpacity>
+                </View>                 
+            </SafeAreaView>                 
+        );
     }
 }
  
