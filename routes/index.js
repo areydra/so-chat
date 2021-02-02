@@ -98,11 +98,11 @@ const Router = () => {
   }, [])
 
   useEffect(() => {
-    if(!permission) {
+    if(permission !== PermissionsAndroid.RESULTS.GRANTED) {
       return;
     }
 
-    handleAfterCheckPermission();
+    setIsLoading(false);
   }, [permission])
 
   const checkPermission = () => {
@@ -120,14 +120,6 @@ const Router = () => {
         .then(permission => setPermission(permission))
         .catch(err => console.warn(err));
   };
-
-  const handleAfterCheckPermission = () => {
-    if(permission !== PermissionsAndroid.RESULTS.GRANTED){
-        return;
-    }
-    
-    setIsLoading(false);
-  }
 
   const checkIsSignedIn = () => {
     if (!auth().currentUser?.uid) {
