@@ -64,13 +64,10 @@ const Swipe = () => (
 )
 
 const HomeStack = () => (
-  <Stack.Navigator initialRouteName="Swipe">
+  <Stack.Navigator headerMode="none" initialRouteName="Swipe">
     <Stack.Screen 
       name="Swipe" 
-      component={Swipe} 
-      options={() => ({
-        headerShown: false
-      })}/>
+      component={Swipe}/>
     <Stack.Screen 
       name="Chat" 
       component={Chat}/>
