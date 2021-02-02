@@ -3,8 +3,7 @@ import { Dimensions } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-
-
+import auth from '@react-native-firebase/auth'
 
 import { Friends, Messages, Profile, Chat, Map, Login, Register, Splash } from '../screens';
 
@@ -87,16 +86,15 @@ const HomeStack = () => (
 
 
 const Router = () => {
-  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-console.log('user',user)
+
   return isLoading ? (
-    <Splash setIsLoading={setIsLoading} setUser={setUser}/>
+    <Splash setIsLoading={setIsLoading}/>
   ):(
     <NavigationContainer>
       <Stack.Navigator>
-        {!user ? (
-          <Stack.Screen name="Auth" component={AuthStack} options={() => ({headerShown: false})} setUser={setUser}/> 
+        {!auth().currentUser?.email ? (
+          <Stack.Screen name="Auth" component={AuthStack} options={() => ({headerShown: false})}/> 
         ):(
           <Stack.Screen name="Home" component={HomeStack}/>
         )}

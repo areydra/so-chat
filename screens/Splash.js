@@ -4,7 +4,7 @@ import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window')
 
-const Splash = ({setIsLoading, setUser}) => {
+const Splash = ({setIsLoading}) => {
     const [permission, setPermission] = useState(null);
 
     useEffect(() => {
@@ -20,7 +20,7 @@ const Splash = ({setIsLoading, setUser}) => {
     const checkPermission = () => {
         PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(locationPermission => {
             if(locationPermission){
-                setPermission(true);
+                setPermission(PermissionsAndroid.RESULTS.GRANTED);
             }else{
                 requestLocationPermission();
             } 
@@ -34,11 +34,8 @@ const Splash = ({setIsLoading, setUser}) => {
     };
 
     const handleAfterCheckPermission = () => {
-        if(permission === PermissionsAndroid.RESULTS.GRANTED){
-            auth().onAuthStateChanged(user => setUser(user));
-        }else{
-            auth().signOut();
-            setUser(null);
+        if(permission !== PermissionsAndroid.RESULTS.GRANTED){
+            return;
         }
 
         setIsLoading(false);
