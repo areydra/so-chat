@@ -11,77 +11,72 @@ import {AuthContext} from '../context';
 const { width } = Dimensions.get('window');
 
 const Stack = createStackNavigator();
+const Tab = createMaterialTopTabNavigator();
 
 const AuthStack = () => (
-  <Stack.Navigator initialRouteName="Login" headerMode="none">
-    <Stack.Screen name="Login" component={Login}/>
-    <Stack.Screen name="Register" component={Register}/>
+  <Stack.Navigator 
+    initialRouteName="Login" 
+    headerMode="none">
+    <Stack.Screen 
+      name="Login" 
+      component={Login}/>
+    <Stack.Screen 
+      name="Register" 
+      component={Register}/>
   </Stack.Navigator>
 )
 
-const MessagesStack = () => (
-  <Stack.Navigator headerMode="none">
-    <Stack.Screen name="Messages" component={Messages}/>
-  </Stack.Navigator>
-)
-
-const ChatStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Chat" component={Chat}/>
-  </Stack.Navigator>
-)
-
-const MapStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Map" component={Map}/>
-  </Stack.Navigator>
-)
-
-const FriendsStack = () => (
-  <Stack.Navigator headerMode="none">
-    <Stack.Screen name="Friends" component={Friends}/>
-  </Stack.Navigator>
-)
-
-const ProfileStack = () => (
-  <Stack.Navigator headerMode="none">
-    <Stack.Screen name="Profile" component={Profile}/>
-  </Stack.Navigator>
-)
-
-const Tab = createMaterialTopTabNavigator();
 const Swipe = () => (
-  <Tab.Navigator initialRouteName="Messages" tabBarPosition="top" swipeEnabled={true} tabBarOptions={{
-    scrollEnabled: true,
-    activeTintColor: '#FFFFFF',
-    inactiveTintColor: '#FFFFFF',
-    style: {
-      backgroundColor: '#2FAEB2',
-    },
-    tabStyle: {
-      width: width/3,
-    },
-    labelStyle: {
-      textAlign: 'center',
-      fontSize: 10,
-      fontWeight: 'bold',
-    },
-    indicatorStyle: {
-      borderBottomColor: '#FFFFFF',
-      borderBottomWidth: 3,
-    },
-  }}>
-    <Tab.Screen name="Friends" component={FriendsStack} />
-    <Tab.Screen name="Messages" component={MessagesStack} />
-    <Tab.Screen name="Profile" component={ProfileStack} />
+  <Tab.Navigator 
+    initialRouteName="Messages" 
+    tabBarPosition="top" 
+    swipeEnabled={true} 
+    tabBarOptions={{
+      scrollEnabled: true,
+      activeTintColor: '#FFFFFF',
+      inactiveTintColor: '#FFFFFF',
+      style: {
+        backgroundColor: '#2FAEB2',
+      },
+      tabStyle: {
+        width: width/3,
+      },
+      labelStyle: {
+        textAlign: 'center',
+        fontSize: 10,
+        fontWeight: 'bold',
+      },
+      indicatorStyle: {
+        borderBottomColor: '#FFFFFF',
+        borderBottomWidth: 3,
+      },
+    }}>
+    <Tab.Screen 
+      name="Friends" 
+      component={Friends}/>
+    <Tab.Screen 
+      name="Messages" 
+      component={Messages}/>
+    <Tab.Screen 
+      name="Profile" 
+      component={Profile}/>
   </Tab.Navigator>
 )
 
 const HomeStack = () => (
-  <Stack.Navigator headerMode="none" initialRouteName="Swipe">
-    <Stack.Screen name="Swipe" component={Swipe} />
-    <Stack.Screen name="Chat" component={ChatStack} />
-    <Stack.Screen name="Map" component={MapStack} />
+  <Stack.Navigator initialRouteName="Swipe">
+    <Stack.Screen 
+      name="Swipe" 
+      component={Swipe} 
+      options={() => ({
+        headerShown: false
+      })}/>
+    <Stack.Screen 
+      name="Chat" 
+      component={Chat}/>
+    <Stack.Screen 
+      name="Map" 
+      component={Map}/>
   </Stack.Navigator>
 )
 
