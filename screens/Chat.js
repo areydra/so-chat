@@ -44,7 +44,7 @@ class Chat extends Component {
     }
 
     getMessage = () => {
-        const { uid } = this.props.navigation.state.params.item;
+        const { uid } = this.props.route.params.item;
 
         database().ref('messages/').child(this.state.user.uid).child(uid).on('child_added', newMessage => {
             this.setState(prevState => {
@@ -58,7 +58,7 @@ class Chat extends Component {
     handleSendMessage = () => {
         const updates = {}
         const { text, user } = this.state
-        const { uid }  = this.props.navigation.state.params.item
+        const { uid }  = this.props.route.params.item
 
         if(text.length){
             let messageId = database().ref('messages').child(user.uid).child(uid).push().key
@@ -110,7 +110,7 @@ class Chat extends Component {
     }
 
     getStatus = () => {
-        const { uid } = this.props.navigation.state.params.item
+        const { uid } = this.props.route.params.item
         database().ref('users/' + uid).on('child_changed', user => {
             if (user)
                 this.setState({ status: user.val() })
@@ -118,8 +118,8 @@ class Chat extends Component {
     }
 
      render() { 
-        const { name, photo } = this.props.navigation.state.params.item
-        const status = (this.state.status === null) ? this.props.navigation.state.params.item.status : this.state.status.status
+        const { name, photo } = this.props.route.params.item
+        const status = (this.state.status === null) ? this.props.route.params.item.status : this.state.status.status
 
         return (
                  <SafeAreaView style={styles.container}>
