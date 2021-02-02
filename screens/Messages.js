@@ -8,7 +8,7 @@ import database from '@react-native-firebase/database';
 import Card from '../components/Card';
 import Search from '../components/Search';
 
-const Messages = () => {
+const Messages = ({navigation}) => {
   const [user, setUser] = useState(null);
   const [query, setQuery] = useState('');
   const [persons, setPersons] = useState([]);
@@ -115,10 +115,10 @@ const Messages = () => {
 
     return(
       <FlatList
-        keyExtractor={data => data.name}
+        keyExtractor={(data, index) => index}
         data={uniqMessage}
         renderItem={data => (
-          <Card screen="chat" item={data.item} screen="messages" navigation={props.navigation}/>
+          <Card screen="chat" item={data.item} screen="messages" navigation={navigation}/>
         )}
       />
     )
