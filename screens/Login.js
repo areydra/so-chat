@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, TouchableOpacity, StyleSheet, Keyboard, View, Text, TextInput, Dimensions, PermissionsAndroid, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth'
+import {witContext} from '../context';
 
 const { width } = Dimensions.get('window')
 
@@ -30,7 +31,9 @@ const Login = props => {
     }
 
     const processLogin = () => {
-        auth().signInWithEmailAndPassword(email, password).catch(err => {
+        auth().signInWithEmailAndPassword(email, password).then(() => {
+            props.signIn(true);
+        }).catch(err => {
             setPassword('')
             setErrorMessage(err.message)
         })
@@ -136,4 +139,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Login;
+export default witContext(Login);

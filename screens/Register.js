@@ -3,6 +3,8 @@ import { SafeAreaView, TouchableOpacity, StyleSheet, View, Text, Keyboard, TextI
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 
+import {witContext} from '../context';
+
 const { width } = Dimensions.get('window')
 
 const Register = props => {
@@ -49,6 +51,10 @@ const Register = props => {
                 name: name,
                 status: 'online'
             })
+            
+            if (auth().currentUser) {
+                props.signIn(true);
+            }
         }).catch((err) => {
             setErrorMessage(err.message)
         })
@@ -163,4 +169,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Register;
+export default witContext(Register);

@@ -1,19 +1,20 @@
-import React, {useState} from 'react';
-import { Dimensions } from 'react-native';
+import React, {useState, useMemo, useEffect} from 'react';
+import { Dimensions, PermissionsAndroid } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
 import { Friends, Messages, Profile, Chat, Map, Login, Register, Splash } from '../screens';
+import {AuthContext} from '../context';
 
 const { width } = Dimensions.get('window');
 
 const Stack = createStackNavigator();
 
-const AuthStack = ({setUser}) => (
+const AuthStack = () => (
   <Stack.Navigator initialRouteName="Login" headerMode="none">
-    <Stack.Screen name="Login" component={Login} setUser={setUser}/>
+    <Stack.Screen name="Login" component={Login}/>
     <Stack.Screen name="Register" component={Register}/>
   </Stack.Navigator>
 )
@@ -84,22 +85,86 @@ const HomeStack = () => (
   </Stack.Navigator>
 )
 
-
 const Router = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [permission, setPermission] = useState(null);
 
-  return isLoading ? (
-    <Splash setIsLoading={setIsLoading}/>
-  ):(
-    <NavigationContainer>
-      <Stack.Navigator>
-        {!auth().currentUser?.email ? (
-          <Stack.Screen name="Auth" component={AuthStack} options={() => ({headerShown: false})}/> 
-        ):(
-          <Stack.Screen name="Home" component={HomeStack}/>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+  useEffect(() => {
+    checkIsSignedIn();
+    checkPermission();
+      
+    return checkPermission();
+  }, [])
+
+  useEffect(() => {
+    if(!permission) {
+      return;
+    }
+
+    handleAfterCheckPermission();
+  }, [permission])
+
+  const checkPermission = () => {
+    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(locationPermission => {
+        if(locationPermission){
+            setPermission(PermissionsAndroid.RESULTS.GRANTED);
+        }else{
+            requestLocationPermission();
+        } 
+    })
+  }
+
+  const requestLocationPermission = () => {
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+        .then(permission => setPermission(permission))
+        .catch(err => console.warn(err));
+  };
+
+  const handleAfterCheckPermission = () => {
+    if(permission !== PermissionsAndroid.RESULTS.GRANTED){
+        return;
+    }
+    
+    setIsLoading(false);
+  }
+
+  const checkIsSignedIn = () => {
+    if (!auth().currentUser?.uid) {
+      return;
+    }
+
+    setIsSignedIn(true);
+  }
+
+  const authContext = useMemo(() => ({
+    signIn: isSignedIn => {
+      setIsSignedIn(isSignedIn);
+    },
+  }), []);
+
+  if (isLoading) {
+    return <Splash/>
+  }
+
+  return (
+    <AuthContext.Provider value={authContext}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          {!isSignedIn ? (
+            <Stack.Screen 
+              name="Auth" 
+              component={AuthStack} 
+              options={() => ({headerShown: false})}
+              setIsSignedIn={setIsSignedIn}/> 
+          ):(
+            <Stack.Screen 
+              name="Home" 
+              component={HomeStack}/>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthContext.Provider>
   )
 }
 
