@@ -78,7 +78,7 @@ const Swipe = () => (
 )
 
 const HomeStack = () => (
-  <Stack.Navigator initialRouteName="Swipe">
+  <Stack.Navigator headerMode="none" initialRouteName="Swipe">
     <Stack.Screen name="Swipe" component={Swipe} />
     <Stack.Screen name="Chat" component={ChatStack} />
     <Stack.Screen name="Map" component={MapStack} />
@@ -152,6 +152,7 @@ const Router = () => {
           ):(
             <Stack.Screen 
               name="Home" 
+              options={() => ({headerShown: false})}
               component={HomeStack}/>
           )}
         </Stack.Navigator>
