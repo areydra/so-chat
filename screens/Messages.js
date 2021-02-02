@@ -18,7 +18,7 @@ const Messages = ({navigation}) => {
   const [appState, setAppState] = useState(AppState.currentState);
 
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    setUser(auth().currentUser);
     AppState.addEventListener('change', _handleAppStateChange);
 
     return(() => {
@@ -47,10 +47,6 @@ const Messages = ({navigation}) => {
   useEffect(() => {
     handleFilterPersons()
   }, [query])
-
-  const onAuthStateChanged = (user) => {    
-    setUser(user);
-  }
 
   const _handleAppStateChange = nextAppState => {
     if(!user) return;

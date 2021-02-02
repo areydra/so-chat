@@ -14,8 +14,7 @@ const Friends = ({... props}) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-        return subscriber;
+        setUser(auth().currentUser);
     }, []);
 
     useEffect(() => {
@@ -25,10 +24,6 @@ const Friends = ({... props}) => {
     useEffect(() => {
         filterPersons();
     }, [query])
-
-    const onAuthStateChanged = (user) => {
-        setUser(user);
-    }
 
     const getPersons = () => {
         if (!user) {
@@ -55,8 +50,11 @@ const Friends = ({... props}) => {
             <FlatList 
                 keyExtractor={item => item.uid}
                 data={(personsHasFiltered.length || query.length) ? personsHasFiltered : persons}
-                renderItem={user => (
-                    <Card item={user.item} screen='friends' navigation={props.navigation}/>
+                renderItem={user => user?.item && (
+                    <Card 
+                        item={user.item} 
+                        screen='friends' 
+                        navigation={props.navigation}/>
                 )}
             />
         </SafeAreaView>

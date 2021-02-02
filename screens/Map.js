@@ -14,17 +14,12 @@ const Map = ({... props}) => {
     const { show, person } = props.navigation.state.params;
 
     useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-        return subscriber;
+        setUser(auth().currentUser);
     }, [])
 
     useEffect(() => {
         getPersons();
     }, [user])
-
-    const onAuthStateChanged = (user) => {
-        setUser(user);
-    }
 
     const getPersons = () => {
         database().ref('users').on('child_added', person => {

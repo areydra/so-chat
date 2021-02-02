@@ -33,10 +33,8 @@ const Profile = ({}) => {
   const avatar = user.photo ? userAvatar : defaultAvatar;
 
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    setUser(auth().currentUser)
     checkPermission();
-
-    return subscriber;
   }, [])
 
   const checkPermission = () => {

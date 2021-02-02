@@ -31,14 +31,6 @@ class Chat extends Component {
         this.getStatus();
     }
 
-    onAuthStateChanged = (user) => {
-        if (this.state.initializing) {
-            this.setState({initializing: false});
-        }
-
-        this.setState({user});
-    }
-
     getMessage = () => {
         const currentUserUid = this.currentUser?.uid;
         const friendUid = this.props.route.params?.item?.uid;

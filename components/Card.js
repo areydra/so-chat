@@ -13,17 +13,12 @@ const Card = ({item, screen, navigation}) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-        return subscriber;
+        setUser(auth().currentUser);
     }, [])
 
     useEffect(() => {
         getLastMessage();
     }, [user])
-
-    const onAuthStateChanged = (user) => {
-        setUser(user);
-    }
 
     const getLastMessage = async() => {
         if (!user) {
@@ -74,7 +69,7 @@ const Card = ({item, screen, navigation}) => {
                 </TouchableOpacity>
                 <View style={styles.cardTextContainer}>
                     <TouchableOpacity onPress={() => navigation.navigate('Chat', {item})}>
-                        <Text style={styles.cardTextName}>{(item.name.length > 25) ? item.name.substr(0, 25) + '...' : item.name}</Text>
+                        <Text style={styles.cardTextName}>{(item.name?.length > 25) ? item.name?.substr(0, 25) + '...' : item.name}</Text>
                     </TouchableOpacity>
                     <View style={styles.cardStatusOrMessage}>
                         <Text>{item.myStatus}</Text>
@@ -119,7 +114,7 @@ const Card = ({item, screen, navigation}) => {
                 </View>
                 <View style={styles.cardTextContainer}>
                     <TouchableOpacity onPress={() => navigation.navigate('Chat', {item:item})}>
-                        <Text style={styles.cardTextName}>{(item.name.length > 20) ? item.name.substr(0, 20) + '...' : item.name}</Text>
+                        <Text style={styles.cardTextName}>{(item.name?.length > 20) ? item.name?.substr(0, 20) + '...' : item.name}</Text>
                     </TouchableOpacity>
                     <View style={styles.cardStatusOrMessage}>
                         {
