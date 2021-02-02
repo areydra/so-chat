@@ -7,7 +7,7 @@ import database from '@react-native-firebase/database';
 
 const { width } = Dimensions.get('window')
 
-const Card = ({item, screen}) => {
+const Card = ({item, screen, navigation}) => {
     const [visible, setVisible] = useState(false);
     const [lastMessage, setLastMessage] = useState([]);
     const [user, setUser] = useState(null);
@@ -73,7 +73,7 @@ const Card = ({item, screen}) => {
                     </View>
                 </TouchableOpacity>
                 <View style={styles.cardTextContainer}>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Chat', {item})}>
                         <Text style={styles.cardTextName}>{(item.name.length > 25) ? item.name.substr(0, 25) + '...' : item.name}</Text>
                     </TouchableOpacity>
                     <View style={styles.cardStatusOrMessage}>
@@ -82,7 +82,7 @@ const Card = ({item, screen}) => {
                 </View>
                 {item.location && 
                     <View style={styles.cardIconLocationContainer}>
-                        <TouchableOpacity onPress={() => props.navigation.navigate('Map', {person: item})}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Map', {person: item})}>
                             <Image source={require('../assets/icons/location.png')} style={styles.cardIconLocation} />
                         </TouchableOpacity>
                     </View>
@@ -118,7 +118,7 @@ const Card = ({item, screen}) => {
                     <Image source={avatar} style={ styles.cardImage } />
                 </View>
                 <View style={styles.cardTextContainer}>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('Chat', {item:item})}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Chat', {item:item})}>
                         <Text style={styles.cardTextName}>{(item.name.length > 20) ? item.name.substr(0, 20) + '...' : item.name}</Text>
                     </TouchableOpacity>
                     <View style={styles.cardStatusOrMessage}>
