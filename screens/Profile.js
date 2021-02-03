@@ -16,10 +16,11 @@ import {
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import storage from '@react-native-firebase/storage';
+import {witContext} from '../context';
 
 const {width} = Dimensions.get('window');
 
-const Profile = ({}) => {
+const Profile = (props) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [myStatus, setMyStatus] = useState('');
@@ -95,22 +96,18 @@ const Profile = ({}) => {
     });  
   };
 
-  const onAuthStateChanged = (user) => {
-    database().ref(`users/${user.uid}`).once('value').then(res => setUser({uid: user.uid, email: user.email, ...res.val()}));
-  };
-
   const handleSignOut = () => {
-    auth().signOut().then(() => updateStatusUser());
-  };
+    const userId = user.id;
+    const status = database.ServerValue.TIMESTAMP;
 
-  const updateStatusUser = () => {
-    let status = database.ServerValue.TIMESTAMP; 
-    database().ref(`users/${user.uid}`).update({status}).then(() =>{
-      navigateToAuthStack();
+    database().ref(`users/${userId}`).update({status}).then(() => {
+      auth().signOut().then(() => {
+        props.signIn(false)
+      }).catch(() => {        
+        database().ref(`users/${userId}`).update({status: 'online'});
+      });
     });
-  }
-
-  const navigateToAuthStack = () => props.navigation.navigate('AuthStack');
+  };
 
   const updateName = () => {
     if(name.length < 4) return;
@@ -275,4 +272,4 @@ const Styles = StyleSheet.create({
   }
 });
 
-export default Profile;
+export default witContext(Profile);
