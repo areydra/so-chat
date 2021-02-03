@@ -1,90 +1,37 @@
-import { Thumbnail } from 'native-base';
-import React, { useState, useEffect } from 'react';
-import MapView, { Marker } from 'react-native-maps';
-import { SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacity} from 'react-native';
+import {Thumbnail} from 'native-base';
+import MapView, {Marker} from 'react-native-maps';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import toArray from 'lodash/toArray';
 
 const { width } = Dimensions.get('window')
 
-const Map = ({... props}) => {
-    const [persons, setPersons] = useState([]);
-    const [user, setUser] = useState(null);
-
-    const { show, person } = props.navigation.state.params;
+const Map = (props) => {
+    const [users, setUsers] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        setUser(auth().currentUser);
+        setCurrentUser(auth().currentUser);
     }, [])
 
     useEffect(() => {
-        getPersons();
-    }, [user])
+        getUsers();
 
-    const getPersons = () => {
-        database().ref('users').on('child_added', person => {
-            if(person.location === undefined) return;
-            setPersons([...persons, person]);
-        })
+        return getUsers();
+    }, [currentUser])
+
+    const getUsers = () => {
+        if (props.route.params?.show !== 'all') {
+            return setUsers([props.route.params?.person]);
+        }
+
+        database().ref('users').on('value', users => {
+            let filteredUsers = toArray(users.val()).filter(user => user.location);
+            setUsers(filteredUsers);
+        });
     }
-
-    const allPersons = () => (
-        <MapView 
-            style={Styles.locationContainer} 
-            zoomControlEnabled={true} 
-            showsUserLocation={true} 
-            followUserLocation={true}
-            region={{
-                latitude: -6.778489,
-                longitude: 107.122118,
-                latitudeDelta: 25,
-                longitudeDelta: 25,
-            }}>
-                {persons.map((person, index) => (
-                    <Marker
-                        key={index}
-                        coordinate={{
-                            latitude: person.location.latitude,
-                            longitude: person.location.longitude
-                        }}
-                        title={person.name}
-                        identifier={person.index}
-                        onCalloutPress={(user?.uid !== person.uid) ? () => props.navigation.navigate('Chat', {item: person}) : null}
-                    >
-                        <Thumbnail small source={getAvatar(person)} 
-                            style={{ borderWidth: 2, borderColor: (myLocation.uid === person.uid) ? '#2FAEB2' : (person.status === 'online') ? '#00ff2f' : 'grey' }} 
-                        />
-                    </Marker>
-                ))}
-        </MapView>
-    )
-
-    const specificPerson = () => (
-        <MapView 
-            style={Styles.locationContainer} 
-            zoomControlEnabled={true} 
-            showsUserLocation={true} 
-            followUserLocation={true}
-            region={{
-                latitude: person.location.latitude,
-                longitude: person.location.longitude,
-                latitudeDelta: 0.015,
-                longitudeDelta: 0.0121,
-        }}>
-            <Marker
-                coordinate={{
-                    latitude: person.location.latitude,
-                    longitude: person.location.longitude
-                }}
-                title={person.name}
-                onCalloutPress={() => props.navigation.navigate('Chat', { item: person })}
-            >
-                <Thumbnail small source={getAvatar(person)} 
-                    style={{ borderWidth: 2, borderColor: (person.status === 'online') ? '#00ff2f' : 'grey' }} 
-                />
-            </Marker>
-        </MapView>
-    )
 
     const getAvatar = person => {
         const userAvatar = {uri: person.photo};
@@ -93,17 +40,110 @@ const Map = ({... props}) => {
         return person.photo ? userAvatar : defaultAvatar;
     }
 
+    const getRegion = () => {
+        const isShowAll = props.route.params?.show === 'all';
+
+        if (!isShowAll) {
+            return {
+                latitude: props.route.params?.person?.location?.latitude,
+                longitude: props.route.params?.person?.location?.longitude,
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.0121,
+            };
+        }
+
+        return {
+            latitude: -6.778489,
+            longitude: 107.122118,
+            latitudeDelta: 25,
+            longitudeDelta: 25,
+        };
+    }
+
+    const getTitleNavbar = () => {
+        const isShowAll = props.route.params?.show === 'all';
+
+        if (!isShowAll) {
+            return props.route.params?.person?.name + ' Location';
+        }
+
+        return 'All Friends Location';
+    }
+
+    const handleMarkerOnCallout = (user) => {
+        if (currentUser?.uid === user.uid){
+            return;
+        }
+
+        props.navigation.navigate('Chat', {item: user});
+    }
+
+    const getThumbnailStyle = (user) => {
+        let borderColor = 'grey';
+
+        if (currentUser?.uid === user.uid) {
+            borderColor = '#2FAEB2';
+        }
+
+        if (user.status === 'online') {
+            '#00ff2f';
+        }
+
+        return { 
+            borderColor,
+            borderWidth: 2
+        };
+    }
+
+    const backToPrevScene = () => {
+        props.navigation.goBack();
+    }
+ 
+    const MapViewUsers = () => (
+        <View style={Styles.locationContainer}>
+            <MapView 
+                style={Styles.locationContainer}
+                zoomControlEnabled={true}
+                showsUserLocation={true}
+                followUserLocation={true}
+                region={getRegion()}>
+                    {users?.map((data, index) => (
+                        <MarkerUsers
+                            key={index}
+                            user={data}/>
+                    ))}
+            </MapView>
+        </View>
+    )
+
+    const MarkerUsers = ({user}) => (
+        <Marker
+            coordinate={{
+                latitude: user.location.latitude,
+                longitude: user.location.longitude
+            }}
+            title={user.name}
+            identifier={user.uid}
+            onCalloutPress={() => handleMarkerOnCallout(user)}>
+                <Thumbnail 
+                    small 
+                    source={getAvatar(user)} 
+                    style={getThumbnailStyle(user)} 
+                />
+        </Marker>
+    )
+
     return (
         <SafeAreaView style={Styles.container}>
             <View style={Styles.titleContainer}>
-                <TouchableOpacity onPress={() => props.navigation.goBack()}>
-                    <Image source={require('../assets/icons/arrow_back_black.png')} style={Styles.arrowBack} />
+                <TouchableOpacity onPress={backToPrevScene}>
+                    <Image 
+                        source={require('../assets/icons/arrow_back_black.png')} 
+                        style={Styles.arrowBack}/>
                 </TouchableOpacity>
-                <Text style={Styles.title}>{show === 'all' ? 'All Friends Location' : person.name + ' Location'}</Text>
+                <Text style={Styles.title}>{getTitleNavbar()}</Text>
             </View>
-            <View style={Styles.locationContainer}>
-                {show === 'all' ? allPersons() : specificPerson()}
-            </View>
+            <MapViewUsers/>
         </SafeAreaView>
     );
 }
