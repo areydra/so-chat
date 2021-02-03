@@ -156,10 +156,6 @@ const Profile = (props) => {
     );
   }
 
-  if (!user.uid) {
-    return <Text>Loading.....</Text>;
-  }
-
   return (
     <ScrollView style={Styles.container}>
       <TouchableOpacity onPress={changeAvatar}>
