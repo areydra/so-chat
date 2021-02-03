@@ -61,7 +61,11 @@ const Profile = (props) => {
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
       ])
       .then(status => {
-        if(status === PermissionsAndroid.RESULTS.GRANTED) setPermission(true);
+        if (status !== PermissionsAndroid.RESULTS.GRANTED){
+          return;
+        }
+
+        setPermission(true);
       })
   };
 
@@ -109,28 +113,36 @@ const Profile = (props) => {
   };
 
   const updateName = () => {
-    if(name.length < 4) return;
+    if (name.length < 4) {
+      return;
+    }
 
     database().ref(`users/${user.uid}`).update({name});
     setName('');
   }
 
   const updateMyStatus = () => {
-    if(!myStatus.length) return;
+    if (!myStatus.length) {
+      return;
+    }
 
     database().ref(`users/${user.uid}`).update({myStatus});
     setMyStatus('');
   }
 
   const updatePhone = () => {
-    if(!phone.length) return;
+    if (!phone.length) {
+      return;
+    }
 
     database().ref(`users/${user.uid}`).update({phone});
     setPhone('');
   }  
  
   const updatePassword = () => {
-    if(password.length < 6) return setError('Password must be 6 character');
+    if (password.length < 6) {
+      return setError('Password must be 6 character');
+    }
 
     auth().currentUser.updatePassword(password).then(() => alertPasswordSuccessUpdated());
     setPassword('');
@@ -144,7 +156,9 @@ const Profile = (props) => {
     );
   }
 
-  if(user.uid === null) return <Text>Loading.....</Text>;
+  if (!user.uid) {
+    return <Text>Loading.....</Text>;
+  }
 
   return (
     <ScrollView style={Styles.container}>
