@@ -1,6 +1,4 @@
-import RNFetchBlob from 'rn-fetch-blob';
 import React, {useState, useEffect} from 'react';
-import ImagePicker from 'react-native-image-picker';
 import {
   Image,
   TouchableOpacity,
@@ -13,12 +11,23 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
-import storage from '@react-native-firebase/storage';
+import FirebaseStorage from '@react-native-firebase/storage';
+
 import {witContext} from '../context';
 
 const {width} = Dimensions.get('window');
+
+const IMAGE_PICKER_OPTIONS = {
+  title: 'Select Profile',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+  mediaType: 'photo',
+};
 
 const Profile = (props) => {
   const [name, setName] = useState('');
@@ -28,13 +37,11 @@ const Profile = (props) => {
   const [error, setError] = useState('');
   const [permission, setPermission] = useState(false);
   const [user, setUser] = useState({uid: '', email: '', name: ''});
-
-  const userAvatar = {uri: user.photo}
-  const defaultAvatar = require('../assets/icons/icon_avatar.png');
-  const avatar = user.photo ? userAvatar : defaultAvatar;
+  const [avatar, setAvatar] = useState(null);
 
   useEffect(() => {
     setUser(auth().currentUser)
+    getAvatarFromFirebaseStorage();    
     checkPermission();
   }, [])
 
@@ -58,42 +65,34 @@ const Profile = (props) => {
       })
   };
 
-  const changeImage = () => {
-    if(!permission) return requestPermission();
+  const getAvatarFromFirebaseStorage = async () => {
+    const uri = await FirebaseStorage().ref(`images/${auth().currentUser.uid}`).getDownloadURL();
 
-    const fs = RNFetchBlob.fs;
-    const Blob = RNFetchBlob.polyfill.Blob;
+    if (!uri) {
+      setAvatar(require('../assets/icons/icon_avatar.png'));
+    }
 
-    window.Blob = Blob;
-    window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
+    setAvatar({uri});
+  }
+  
+  const uploadAvatarToFirebaseStorage = (uri) => {
+    FirebaseStorage().ref(`images/${user.uid}`).putFile(uri).then(() => {
+      setAvatar({uri})
+    });
+  }
 
-    const options = {
-      title: 'Select Profile',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-      mediaType: 'photo',
-    };
-      
+  const changeAvatar = () => {
+    if (!permission) {
+      return requestPermission();
+    }
     
-    ImagePicker.showImagePicker(options, image => {
-      let uploadBob = null;
-      const imageRef = storage().ref('images/' + user.uid);
+    ImagePicker.showImagePicker(IMAGE_PICKER_OPTIONS, image => {
+      if (!image?.path) {
+        return;
+      }
 
-      fs.readFile(image.path, 'base64')
-        .then(data => Blob.build(data, {type: `${image.mime};BASE64`}))
-        .then(blob => {
-          uploadBob = blob;
-          return imageRef.put(blob, {contentType: `${image.mime}`});
-        })
-        .then(() => {
-          uploadBob.close();
-          return imageRef.getDownloadURL();
-        })
-        .then(url => database().ref(`users/${user.uid}`).update({photo: url}))
-        .catch(err => console.log(err));
-    });  
+      uploadAvatarToFirebaseStorage(image.path);
+    });
   };
 
   const handleSignOut = () => {
@@ -149,7 +148,7 @@ const Profile = (props) => {
 
   return (
     <ScrollView style={Styles.container}>
-      <TouchableOpacity onPress={changeImage}>
+      <TouchableOpacity onPress={changeAvatar}>
         <View style={Styles.imageProfile}>
           <Image source={avatar} style={Styles.iconAvatar}/>
           <Image source={require('../assets/icons/photo_camera.png')} style={Styles.iconCamera}/>
