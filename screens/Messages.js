@@ -76,7 +76,7 @@ const Messages = ({navigation}) => {
       return setFilteredMessages(null);
     }
 
-    const filteredMessages = messages.filter(message => (message.name).toLowerCase().includes(query));
+    const filteredMessages = messages.filter(message => (message.name).toLowerCase().includes(query.toLowerCase()));
     setFilteredMessages(filteredMessages);
   }
 
