@@ -1,128 +1,143 @@
-import _, { toArray } from 'lodash';
 import React, {useEffect, useState} from 'react';
-import geolocation from '@react-native-community/geolocation';
-import {SafeAreaView, StyleSheet, FlatList, AppState} from 'react-native';
+import {SafeAreaView, StyleSheet, FlatList} from 'react-native';
+import moment from 'moment';
+import toArray from 'lodash/toArray';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 
-import Card from '../components/Card';
 import Search from '../components/Search';
+import MessageCard from '../components/MessageCard';
 
 const Messages = ({navigation}) => {
-  const [user, setUser] = useState(null);
-  const [query, setQuery] = useState('');
-  const [persons, setPersons] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [messagesUser, setMessagesUser] = useState([]);
-  const [appState, setAppState] = useState(AppState.currentState);
+  const [filteredMessages, setFilteredMessages] = useState(null);
+  const [allFriends, setAllFriends] = useState(null);
 
   useEffect(() => {
-    setUser(auth().currentUser);
-    AppState.addEventListener('change', _handleAppStateChange);
+    getAllFriends();
 
-    return(() => {
-      AppState.removeEventListener('change', _handleAppStateChange);
-    })
+    return getAllFriends();
   }, [])
 
   useEffect(() => {
-    if (!user) {
+    getMessages();
+
+    return getMessages();
+  }, [allFriends])
+
+  const getAllFriends = () => {
+    const currentUserUid = auth().currentUser?.uid;
+
+    if (!currentUserUid) {
       return;
     }
 
-    getMessages();
-    setGeolocation();
-  }, [user])
-
-  useEffect(() => {
-    if(toArray(messages).length) getPerson();
-  }, [messages])
-
-  useEffect(() => {
-    if(persons.length) getMessage();
-  }, [persons])
-
-  useEffect(() => {
-    handleFilterPersons()
-  }, [query])
-
-  const _handleAppStateChange = nextAppState => {
-    if(!user) return;
-    if (appState.match(/inactive|background/) && nextAppState === 'active') {
-      setGeolocation('online');
-    } else {
-      setGeolocation(database.ServerValue.TIMESTAMP)
-    }
-
-    setAppState(nextAppState)
-  };
-
-  const setGeolocation = (status = 'online') => {
-    geolocation.getCurrentPosition(position => {
-      const location = {latitude: position.coords.latitude, longitude: position.coords.longitude};
-      if(user.uid) database().ref(`users/${user.uid}`).update({location, status});      
-    });    
+    database().ref('users').on('value', users => {
+      let allFriends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
+      setAllFriends(allFriends);
+    });
   }
 
   const getMessages = () => {
-    const messagesRef = database().ref(`messages/${user.uid}`);
-    messagesRef.on('value', messages => {
-      if(messages.val()) setMessages(messages.val());
-    });
-  };
+    const currentUserUid = auth().currentUser?.uid;
 
-  const getPerson = () => {
-    const messageKeys = Object.keys(messages);
-    messageKeys.map(key => {
-      database().ref(`users/${key}`).on('value', person => {
-        if(person.val().uid) setPersons([...persons, person.val()]);
+    if (!currentUserUid) {
+      return;
+    }
+
+    if (!allFriends) {
+      return;
+    }
+
+    database().ref(`messages/${currentUserUid}`).on('value', snapshot => {
+      const friendsUid = Object.keys(snapshot.val());
+      let messages = [];
+
+      friendsUid.map(friendUid => {
+        let message = toArray(snapshot.val()[friendUid]);
+        let friend = allFriends.find(friend => friend.uid === friendUid);
+        let lastIndexOfMessage = message.length - 1;
+
+        messages.push({
+          uid: friend.uid,
+          name: friend.name,
+          status: friend.status,
+          photo: friend.photo,
+          ...message[lastIndexOfMessage],
+        })
       });
-    });
-  }
 
-  const getMessage = () => {
-    persons.map(person => {
-      const personMessage = messages[person.uid];
-      const indexOfLastMessage = Object.keys(personMessage).length - 1;
-      const lastMessage = personMessage[Object.keys(personMessage)[indexOfLastMessage]];
-  
-      if (lastMessage.from !== user.uid) return;
-  
-      setMessagesUser([...messagesUser, {
-        uid: person.uid,
-        name: person.name,
-        photo: person.photo,
-        message: lastMessage,
-      }]);  
+      setMessages(messages);
     })
   }
 
-  const handleFilterPersons = () => {
-    const filtered = messagesUser.filter(person => (person.name).toLowerCase().includes(query.toLowerCase()) && person.uid !== user.uid);
-    setFiltered(filtered);
+  const filterMessages = (query) => {
+    if (!query) {
+      return setFilteredMessages(null);
+    }
+
+    const filteredMessages = messages.filter(message => (message.name).toLowerCase().includes(query));
+    setFilteredMessages(filteredMessages);
   }
 
-  const chatList = () => {
-    if(!messagesUser.length) return;
-    const newestMessage = _.orderBy((filtered.length || query.length) ? filtered : messagesUser, e => e.message.time, ['desc']);
-    const uniqMessage = _.uniqBy(newestMessage, 'uid');
+  const convertTime = (time) => {
+    let currentTime = new Date();
+    let messageTime = new Date(time);
+    let messageTimeByHours = messageTime.getHours();
+    let messageTimeByMinutes = messageTime.getMinutes();
+    let isToday = currentTime.getDay() === messageTime.getDay();
 
-    return(
-      <FlatList
-        keyExtractor={(data, index) => index}
-        data={uniqMessage}
-        renderItem={data => (
-          <Card screen="chat" item={data.item} screen="messages" navigation={navigation}/>
-        )}
-      />
-    )
+    if (messageTimeByHours < 10) {
+        messageTimeByHours = `0${messageTimeByHours}`;
+    }
+
+    if (messageTimeByMinutes < 10) {
+        messageTimeByMinutes = `0${messageTimeByMinutes}`;
+    }
+
+    if (!isToday) {
+        return `${moment(time).format('dddd')} ${messageTimeByHours}:${messageTimeByMinutes}`;
+    }
+
+    return `${messageTimeByHours}:${messageTimeByMinutes}`;
+  };
+
+  const textOverflowEllipsis = (text, limit) => {
+    if (text.length > limit) {
+        return `${text.substr(0, limit)}...`;
+    }
+
+    return text;
+  }
+
+  const getPhoto = (photo) => {
+    if (photo) {
+        return {uri: photo};
+    }
+
+    return require('../assets/icons/icon_avatar.png');
+  }
+
+  const navigateToChatScreen = (item) => {
+    navigation.navigate('Chat', {item});
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <Search onSearch={setQuery} />
-      {chatList()}
+      <Search onSearch={filterMessages}/>
+      <FlatList
+        keyExtractor={(_, index) => toString(index)}
+        data={filteredMessages ?? messages}
+        renderItem={({item}) => (
+          <MessageCard
+            item={item} 
+            name={textOverflowEllipsis(item.name)}
+            photo={getPhoto(item.photo)}
+            time={convertTime(item.time)}
+            message={textOverflowEllipsis(item.message)}
+            shouldShowIcon={auth().currentUser?.uid === item.from}
+            navigateToChatScreen={() => navigateToChatScreen(item)}/>
+        )}/>
     </SafeAreaView>
   );
 }
