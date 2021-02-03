@@ -6,7 +6,6 @@ const SearchComponent = props => {
 
     const onSearch = () => {
         props.onSearch(text);
-        setText('');
     }
 
     return (
