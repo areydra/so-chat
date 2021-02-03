@@ -1,58 +1,60 @@
-import _, { toArray } from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
+import toArray from 'lodash/toArray';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
 
-const Friends = ({... props}) => {
-    const [query, setQuery] = useState('');
-    const [persons, setPersons] = useState([]);
-    const [personsHasFiltered, setPersonsHasFiltered] = useState([]);
-    const [user, setUser] = useState(null);
+const TEXT = {
+    allFriendsLocation: 'Show all friends location',
+};
+
+const Friends = (props) => {
+    const [friends, setFriends] = useState([]);
+    const [filteredFriends, setFilteredFriends] = useState(null);
 
     useEffect(() => {
-        setUser(auth().currentUser);
-    }, []);
+        getFriends();
+    }, [])
 
-    useEffect(() => {
-        getPersons();
-    }, [user])
+    const getFriends = () => {
+        const currentUserUid = auth().currentUser?.uid;
 
-    useEffect(() => {
-        filterPersons();
-    }, [query])
-
-    const getPersons = () => {
-        if (!user) {
+        if (!currentUserUid) {
             return;
         }
         
-        database().ref('users').on('value', persons => {
-            persons = toArray(persons.val()).filter(person => person.uid !== user.uid);
-            setPersons(persons);
+        database().ref('users').on('value', users => {
+            let friends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
+            setFriends(friends);
         });
     }
 
-    const filterPersons = () => {
-        const personsHasFiltered = persons.filter(person => (person.name).toLowerCase().includes(query.toLowerCase()) && person.uid !== user.uid);
-        setPersonsHasFiltered(personsHasFiltered);
+    const filterPersons = (query) => {
+        const filteredFriends = friends.filter(person => (person.name).toLowerCase().includes(query.toLowerCase()));
+        setFilteredFriends(filteredFriends);
+    }
+
+    const navigateToMapScreen = () => {
+        props.navigation.navigate('Map', {show: 'all'});
     }
 
     return (
         <SafeAreaView style={Styles.container}>
-            <Search onSearch={setQuery} />
-            <TouchableOpacity onPress={ () => props.navigation.navigate('Map', { show: 'all' }) }>
-                <Text style={ Styles.showAllFriendsText }>Show all friends location</Text>
+            <Search onSearch={filterPersons} />
+            <TouchableOpacity onPress={navigateToMapScreen}>
+                <Text style={Styles.showAllFriendsText}>
+                    {TEXT.allFriendsLocation}
+                </Text>
             </TouchableOpacity>
             <FlatList 
                 keyExtractor={item => item.uid}
-                data={(personsHasFiltered.length || query.length) ? personsHasFiltered : persons}
-                renderItem={user => user?.item && (
+                data={filteredFriends ?? friends}
+                renderItem={friend => friend?.item && (
                     <Card 
-                        item={user.item} 
+                        item={friend.item} 
                         screen='friends' 
                         navigation={props.navigation}/>
                 )}
