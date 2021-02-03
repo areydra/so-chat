@@ -22,7 +22,6 @@ const Messages = ({navigation}) => {
     AppState.addEventListener('change', _handleAppStateChange);
 
     return(() => {
-      subscriber;
       AppState.removeEventListener('change', _handleAppStateChange);
     })
   }, [])
