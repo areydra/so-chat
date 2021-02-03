@@ -90,12 +90,12 @@ class Chat extends Component {
             return;
         }
 
-        database().ref(`users/${friendUid}`).on('child_changed', user => {
-            if (user.key !== 'status') {
+        database().ref(`users/${friendUid}`).on('value', user => {
+            if (this.state.friendStatus === user.val().status) {
                 return;
             }
 
-            this.setState({friendStatus: user.val()});
+            this.setState({friendStatus: user.val().status});
         });
     }
 
@@ -120,13 +120,15 @@ class Chat extends Component {
     }
 
     getFriendStatus = () => {
-        const friendStatus = this.state.friendStatus ?? this.props.route.params?.item?.status;
+        if (!this.state.friendStatus) {
+            return '';
+        }
 
-        if (friendStatus !== 'online') {
-            return moment(this.state.friendStatus).calendar();
+        if (this.state.friendStatus === 'online') {
+            return 'Online'
         } 
 
-        return 'Online';
+        return moment(this.state.friendStatus).calendar();
     }
 
     renderMessage = (data) => {
