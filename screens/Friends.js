@@ -50,7 +50,7 @@ const Friends = (props) => {
                 </Text>
             </TouchableOpacity>
             <FlatList 
-                keyExtractor={item => item.uid}
+                keyExtractor={(_, index) => index.toString()}
                 data={filteredFriends ?? friends}
                 renderItem={friend => friend?.item && (
                     <Card 
