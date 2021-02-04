@@ -126,7 +126,7 @@ const Login = props => {
                     onChangeText={setPassword}
                     onSubmitEditing={handleLogin}/>
             </View>
-            {!errorMessage && (
+            {errorMessage && (
                 <View style={styles.containerErrorMessage}>
                     <Text style={styles.textErrorMessage}>{errorMessage}</Text>
                 </View>
