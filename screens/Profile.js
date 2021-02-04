@@ -70,13 +70,13 @@ const Profile = (props) => {
   };
 
   const getAvatarFromFirebaseStorage = async () => {
-    const uri = await FirebaseStorage().ref(`images/${auth().currentUser.uid}`).getDownloadURL();
-
-    if (!uri) {
-      setAvatar(require('../assets/icons/icon_avatar.png'));
-    }
-
-    setAvatar({uri});
+    FirebaseStorage().ref(`images/${auth().currentUser.uid}`).getDownloadURL()
+      .then(uri => {
+        setAvatar({uri});
+      })
+      .catch(() => {
+        setAvatar(require('../assets/icons/icon_avatar.png'));
+      });
   }
   
   const uploadAvatarToFirebaseStorage = (uri) => {
