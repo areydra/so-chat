@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, TouchableOpacity, StyleSheet, Keyboard, View, Text, TextInput, Dimensions, PermissionsAndroid, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
@@ -6,18 +6,33 @@ import {witContext} from '../context';
 
 const { width } = Dimensions.get('window')
 
+const TEXT = {
+    title: 'So Chat',
+    buttonLogin: 'Login',
+    buttonRegister: 'Register here..',
+    notHaveAccount: `You don't have account? `,
+};
+
 const Login = props => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [errorMessage, setErrorMessage] = useState('')
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState(null);
+
+    useEffect(() => {
+        if (!errorMessage) {
+            return;
+        }
+        
+        setErrorMessage(null);
+    }, [email, password])
 
     const handleLogin = () => {
-        Keyboard.dismiss()
-        checkPermission()
+        Keyboard.dismiss();
+        checkPermission();
     }
 
     let checkPermission = async () => {
-        let locationPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+        let locationPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
 
         if (!locationPermission) {
             Alert.alert(
@@ -27,63 +42,104 @@ const Login = props => {
                 [{ text: 'Close', style: 'destructive' }]
             );
         } else {
-            processLogin()
+            prepareLogin();
         }
     }
 
-    const processLogin = () => {
+    const localValidation = () => {
+        const isEmailValid = (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g).test(email);
+
+        if (!email && !password) {
+            setErrorMessage('Email and Password cannot be null!');
+            return false;
+        }
+
+        if (!email) {
+            setErrorMessage('Email cannot be null!');
+            return false;
+        }
+
+        if (!isEmailValid) {
+            setErrorMessage('Email not valid!');
+            return false;
+        }
+
+        if (!password) {
+            setErrorMessage('Password cannot be null!');
+            return false;
+        }
+
+        if (password.length < 8) {
+            setErrorMessage('Password not valid!');
+            return false;
+        }
+
+        return true;
+    }
+
+    const prepareLogin = () => {
+        if (!localValidation()) {
+            return;
+        }
+
+        login();
+    }
+
+    const login = () => {
         auth().signInWithEmailAndPassword(email, password).then(snapshot => {
             database().ref(`users/${snapshot.user?.uid}`).update({status: 'online'}).then(() => {
                 props.signIn(true);
             });
         }).catch(err => {
-            setPassword('')
-            setErrorMessage(err.message)
+            setPassword('');
+            setErrorMessage(err.message);
         })
     }
 
-    let input = (errorMessage.length > 0) ? styles.inputError : styles.input
+    const getStylesTextInput = () => {
+        if (!errorMessage) {
+            return styles.input;
+        }
+
+        return styles.inputError;
+    }
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.brandContainer}>
-                <Text style={styles.brand}>So Chat</Text>
+                <Text style={styles.brand}>{TEXT.title}</Text>
             </View>
             <View style={styles.inpuContainer}>
-                <TextInput style={input} autoCapitalize='none' placeholder='Email' 
+                <TextInput 
+                    style={getStylesTextInput()}
+                    autoCapitalize='none'
+                    placeholder='Email'
                     value={email}
-                    onChangeText={text => { 
-                        setEmail(text)
-                        setErrorMessage('')
-                    }} 
-                    onSubmitEditing={() => handleLogin()}
-                    />
-                <TextInput style={input} secureTextEntry={true} placeholder='Password' 
+                    onChangeText={setEmail}
+                    onSubmitEditing={handleLogin}/>
+                <TextInput 
+                    style={getStylesTextInput()}
+                    secureTextEntry={true}
+                    autoCapitalize='none'
+                    placeholder='Password'
                     value={password}
-                    onChangeText={
-                        text => { 
-                            setPassword(text) 
-                            setErrorMessage('')
-                    }} 
-                    onSubmitEditing={() => handleLogin()}
-                    />
+                    onChangeText={setPassword}
+                    onSubmitEditing={handleLogin}/>
             </View>
-            {
-                (errorMessage.length > 0) ? 
-                    <View style={{ alignSelf: 'center', marginTop: 10, marginBottom: -10, marginHorizontal: width/20 }}>
-                        <Text style={{ color: 'red', textAlign: 'center' }}>{errorMessage}</Text>
-                    </View>
-                : null
-            }
-            <TouchableOpacity activeOpacity={0.8} onPress={handleLogin}>
+            {!errorMessage && (
+                <View style={styles.containerErrorMessage}>
+                    <Text style={styles.textErrorMessage}>{errorMessage}</Text>
+                </View>
+            )}
+            <TouchableOpacity onPress={handleLogin}>
                 <View style={styles.button}>
-                    <Text style={styles.textButton}>Login</Text>
+                    <Text style={styles.textButton}>{TEXT.buttonLogin}</Text>
                 </View>
             </TouchableOpacity>
             <View style={styles.containerRegisterHere}>
-                <Text>You don't have account? </Text>
+                <Text>{TEXT.notHaveAccount}</Text>
                 <TouchableOpacity onPress={() => props.navigation.navigate('Register')}>
-                    <Text style={styles.textRegisterHere}>Register here..</Text>
+                    <Text style={styles.textRegisterHere}>{TEXT.buttonRegister}</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -97,27 +153,27 @@ const styles = StyleSheet.create({
     },
     brandContainer: {
         justifyContent: 'center',
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
     brand: {
         textAlign: 'center',
         fontSize: width / 6,
         color: '#2FAEB2',
-        marginBottom: width / 4.5
+        marginBottom: width / 4.5,
     },
     inpuContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
     },
     input: {
         width: width / 2.4,
         borderBottomWidth: 2,
-        borderBottomColor: '#2FAEB2'
+        borderBottomColor: '#2FAEB2',
     },
     inputError: {
         width: width / 2.4,
         borderBottomWidth: 2,
-        borderBottomColor: 'red'
+        borderBottomColor: 'red',
     },
     button: {
         borderRadius: 25,
@@ -125,21 +181,31 @@ const styles = StyleSheet.create({
         marginTop: width/5,
         backgroundColor: '#2FAEB2',
         width: 150,
-        paddingVertical: 10
+        paddingVertical: 10,
     },
     textButton: {
         color: 'white',
-        textAlign: 'center'
+        textAlign: 'center',
     },
     containerRegisterHere: {
         marginTop: width / 15,
         alignSelf: 'center',
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
     textRegisterHere: {
         color: '#2FAEB2',
-        marginLeft: 3
-    }
+        marginLeft: 3,
+    },
+    containerErrorMessage: {
+        alignSelf: 'center',
+        marginTop: 10,
+        marginBottom: -10,
+        marginHorizontal: width/20,
+    },
+    textErrorMessage: {
+        color: 'red',
+        textAlign: 'center',
+    },
 });
 
 export default witContext(Login);
