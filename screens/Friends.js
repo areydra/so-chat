@@ -17,6 +17,7 @@ const Friends = (props) => {
 
     useEffect(() => {
         getFriends();
+        return getFriends();
     }, [])
 
     const getFriends = () => {
