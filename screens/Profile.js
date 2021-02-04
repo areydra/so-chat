@@ -81,7 +81,14 @@ const Profile = (props) => {
   
   const uploadAvatarToFirebaseStorage = (uri) => {
     FirebaseStorage().ref(`images/${user.uid}`).putFile(uri).then(() => {
-      setAvatar({uri})
+      updateAvatarUriInFirebase();
+    });
+  }
+
+  const updateAvatarUriInFirebase = () => {
+    FirebaseStorage().ref(`images/${auth().currentUser.uid}`).getDownloadURL().then(uri => {
+      setAvatar({uri});
+      database().ref(`users/${auth().currentUser?.uid}`).update({photo: uri});
     });
   }
 
