@@ -27,6 +27,10 @@ const Friends = (props) => {
         }
         
         database().ref('users').on('value', users => {
+            if (!users.val()) {
+                return;
+            }
+
             let friends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
             setFriends(friends);
         });

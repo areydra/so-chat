@@ -50,6 +50,10 @@ const Messages = ({navigation}) => {
     }
 
     database().ref(`messages/${currentUserUid}`).on('value', snapshot => {
+      if (!snapshot.val()) {
+        return;
+      }
+
       const friendsUid = Object.keys(snapshot.val());
       let messages = [];
 
