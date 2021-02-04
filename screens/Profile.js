@@ -100,14 +100,17 @@ const Profile = (props) => {
   };
 
   const handleSignOut = () => {
-    const userId = user.id;
+    if (!auth().currentUser?.uid) {
+      return;
+    }
+
     const status = database.ServerValue.TIMESTAMP;
 
-    database().ref(`users/${userId}`).update({status}).then(() => {
+    database().ref(`users/${auth().currentUser.uid}`).update({status}).then(() => {
       auth().signOut().then(() => {
-        props.signIn(false)
-      }).catch(() => {        
-        database().ref(`users/${userId}`).update({status: 'online'});
+        props.signIn(false);
+      }).catch(() => {
+        database().ref(`users/${auth().currentUser.uid}`).update({status: 'online'});
       });
     });
   };
