@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, TouchableOpacity, StyleSheet, View, Text, Keyboard, TextInput, Dimensions, Alert, PermissionsAndroid } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 
 import {witContext} from '../context';
 
@@ -46,11 +46,11 @@ const Register = props => {
     
     const processRegister = () => {
         auth().createUserWithEmailAndPassword(email, password).then(res => {
-            database().ref('users').child(res.user.uid).set({
-                uid: res.user.uid,
-                name: name,
-                status: 'online'
-            })
+            // database().ref('users').child(res.user.uid).set({
+            //     uid: res.user.uid,
+            //     name: name,
+            //     status: 'online'
+            // })
             
             if (auth().currentUser) {
                 props.signIn(true);

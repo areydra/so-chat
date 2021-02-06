@@ -3,7 +3,7 @@ import moment from 'moment'
 import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity, StyleSheet, Modal, View, Text, Dimensions } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 
 const { width } = Dimensions.get('window')
 
@@ -27,17 +27,17 @@ const Card = ({item, screen, navigation}) => {
         
         let person = item
 
-        await database().ref('messages/' + user.uid).on('value', message => {      
-            if(message.val()){
-                let messages = message.val()[person.uid]
-                if(messages){
-                    let lastMessage = Object.keys(messages).length - 1
-                    let uniqMessage = messages[Object.keys(messages)[lastMessage]]
+        // await database().ref('messages/' + user.uid).on('value', message => {      
+        //     if(message.val()){
+        //         let messages = message.val()[person.uid]
+        //         if(messages){
+        //             let lastMessage = Object.keys(messages).length - 1
+        //             let uniqMessage = messages[Object.keys(messages)[lastMessage]]
 
-                    setLastMessage(uniqMessage)
-                }
-            }
-        })
+        //             setLastMessage(uniqMessage)
+        //         }
+        //     }
+        // })
     }
 
     const convertTime = time => {

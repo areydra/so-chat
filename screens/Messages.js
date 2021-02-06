@@ -3,7 +3,7 @@ import {SafeAreaView, StyleSheet, FlatList} from 'react-native';
 import moment from 'moment';
 import toArray from 'lodash/toArray';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 
 import Search from '../components/Search';
 import MessageCard from '../components/MessageCard';
@@ -32,10 +32,10 @@ const Messages = ({navigation}) => {
       return;
     }
 
-    database().ref('users').on('value', users => {
-      let allFriends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
-      setAllFriends(allFriends);
-    });
+    // database().ref('users').on('value', users => {
+    //   let allFriends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
+    //   setAllFriends(allFriends);
+    // });
   }
 
   const getMessages = () => {
@@ -49,30 +49,30 @@ const Messages = ({navigation}) => {
       return;
     }
 
-    database().ref(`messages/${currentUserUid}`).on('value', snapshot => {
-      if (!snapshot.val()) {
-        return;
-      }
+    // database().ref(`messages/${currentUserUid}`).on('value', snapshot => {
+    //   if (!snapshot.val()) {
+    //     return;
+    //   }
 
-      const friendsUid = Object.keys(snapshot.val());
-      let messages = [];
+    //   const friendsUid = Object.keys(snapshot.val());
+    //   let messages = [];
 
-      friendsUid.map(friendUid => {
-        let message = toArray(snapshot.val()[friendUid]);
-        let friend = allFriends.find(friend => friend.uid === friendUid);
-        let lastIndexOfMessage = message.length - 1;
+    //   friendsUid.map(friendUid => {
+    //     let message = toArray(snapshot.val()[friendUid]);
+    //     let friend = allFriends.find(friend => friend.uid === friendUid);
+    //     let lastIndexOfMessage = message.length - 1;
 
-        messages.push({
-          uid: friend.uid,
-          name: friend.name,
-          status: friend.status,
-          photo: friend.photo,
-          ...message[lastIndexOfMessage],
-        })
-      });
+    //     messages.push({
+    //       uid: friend.uid,
+    //       name: friend.name,
+    //       status: friend.status,
+    //       photo: friend.photo,
+    //       ...message[lastIndexOfMessage],
+    //     })
+    //   });
 
-      setMessages(messages);
-    })
+    //   setMessages(messages);
+    // })
   }
 
   const filterMessages = (query) => {

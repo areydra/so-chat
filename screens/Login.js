@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, TouchableOpacity, StyleSheet, Keyboard, View, Text, TextInput, Dimensions, PermissionsAndroid, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 import {witContext} from '../context';
 
 const { width } = Dimensions.get('window')
@@ -87,9 +87,9 @@ const Login = props => {
 
     const login = () => {
         auth().signInWithEmailAndPassword(email, password).then(snapshot => {
-            database().ref(`users/${snapshot.user?.uid}`).update({status: 'online'}).then(() => {
-                props.signIn(true);
-            });
+            // database().ref(`users/${snapshot.user?.uid}`).update({status: 'online'}).then(() => {
+            //     props.signIn(true);
+            // });
         }).catch(err => {
             setPassword('');
             setErrorMessage(err.message);

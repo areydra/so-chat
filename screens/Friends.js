@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
 import toArray from 'lodash/toArray';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 
 import Card from '../components/Card';
 import Search from '../components/Search';
@@ -27,14 +27,14 @@ const Friends = (props) => {
             return;
         }
         
-        database().ref('users').on('value', users => {
-            if (!users.val()) {
-                return;
-            }
+        // database().ref('users').on('value', users => {
+        //     if (!users.val()) {
+        //         return;
+        //     }
 
-            let friends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
-            setFriends(friends);
-        });
+        //     let friends = toArray(users.val()).filter(user => user.uid !== currentUserUid);
+        //     setFriends(friends);
+        // });
     }
 
     const filterPersons = (query) => {

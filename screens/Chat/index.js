@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import moment from 'moment';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 import toArray from 'lodash/toArray';
 import orderBy from 'lodash/orderBy';
 
@@ -62,30 +62,30 @@ class Chat extends Component {
             return;
         }
         
-        database().ref('messages/').child(currentUserUid).child(friendUid).once('value', messages => {
-            const lastMessageKey = Object.keys(messages.val())[0];
-            messages = orderBy(toArray(messages.val()), 'time', 'desc');
+        // database().ref('messages/').child(currentUserUid).child(friendUid).once('value', messages => {
+        //     const lastMessageKey = Object.keys(messages.val())[0];
+        //     messages = orderBy(toArray(messages.val()), 'time', 'desc');
 
-            this.setState({messages, lastMessageKey});
-        });
+        //     this.setState({messages, lastMessageKey});
+        // });
     }
 
     getNewMessageListener = () => {
         const currentUserUid = this.currentUser?.uid;
         const friendUid = this.props.route.params?.item?.uid;
 
-        database().ref('messages/').child(currentUserUid).child(friendUid).limitToLast(1).on('child_added', newMessage => {
-            if (!this.state.lastMessageKey) {
-                return;
-            }
+        // database().ref('messages/').child(currentUserUid).child(friendUid).limitToLast(1).on('child_added', newMessage => {
+        //     if (!this.state.lastMessageKey) {
+        //         return;
+        //     }
 
-            if (this.state.lastMessageKey === newMessage.key) {
-                return;
-            }
+        //     if (this.state.lastMessageKey === newMessage.key) {
+        //         return;
+        //     }
 
-            const messages = [newMessage.val(), ...this.state.messages];
-            this.setState({messages, lastMessageKey: newMessage.key});
-        });
+        //     const messages = [newMessage.val(), ...this.state.messages];
+        //     this.setState({messages, lastMessageKey: newMessage.key});
+        // });
     }
 
     handleSendMessage = (message) => {
@@ -103,8 +103,8 @@ class Chat extends Component {
             from: currentUserUid,
         };
 
-        database().ref('messages').child(currentUserUid).child(friendUid).push(payloadMessage);
-        database().ref('messages').child(friendUid).child(currentUserUid).push(payloadMessage);
+        // database().ref('messages').child(currentUserUid).child(friendUid).push(payloadMessage);
+        // database().ref('messages').child(friendUid).child(currentUserUid).push(payloadMessage);
     }
 
     convertTime = time => {
@@ -127,13 +127,13 @@ class Chat extends Component {
             return;
         }
 
-        database().ref(`users/${friendUid}`).on('value', user => {
-            if (this.state.friendStatus === user.val().status) {
-                return;
-            }
+        // database().ref(`users/${friendUid}`).on('value', user => {
+        //     if (this.state.friendStatus === user.val().status) {
+        //         return;
+        //     }
 
-            this.setState({friendStatus: user.val().status});
-        });
+        //     this.setState({friendStatus: user.val().status});
+        // });
     }
 
     getFriendPhotoProfile = () => {

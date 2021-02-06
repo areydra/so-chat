@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 import FirebaseStorage from '@react-native-firebase/storage';
 
 import {witContext} from '../context';
@@ -88,7 +88,7 @@ const Profile = (props) => {
   const updateAvatarUriInFirebase = () => {
     FirebaseStorage().ref(`images/${auth().currentUser.uid}`).getDownloadURL().then(uri => {
       setAvatar({uri});
-      database().ref(`users/${auth().currentUser?.uid}`).update({photo: uri});
+      // database().ref(`users/${auth().currentUser?.uid}`).update({photo: uri});
     });
   }
 
@@ -111,15 +111,15 @@ const Profile = (props) => {
       return;
     }
 
-    const status = database.ServerValue.TIMESTAMP;
+    // const status = database.ServerValue.TIMESTAMP;
 
-    database().ref(`users/${auth().currentUser.uid}`).update({status}).then(() => {
-      auth().signOut().then(() => {
-        props.signIn(false);
-      }).catch(() => {
-        database().ref(`users/${auth().currentUser.uid}`).update({status: 'online'});
-      });
-    });
+    // database().ref(`users/${auth().currentUser.uid}`).update({status}).then(() => {
+    //   auth().signOut().then(() => {
+    //     props.signIn(false);
+    //   }).catch(() => {
+    //     database().ref(`users/${auth().currentUser.uid}`).update({status: 'online'});
+    //   });
+    // });
   };
 
   const updateName = () => {
@@ -127,7 +127,7 @@ const Profile = (props) => {
       return;
     }
 
-    database().ref(`users/${user.uid}`).update({name});
+    // database().ref(`users/${user.uid}`).update({name});
     setName('');
   }
 
@@ -136,7 +136,7 @@ const Profile = (props) => {
       return;
     }
 
-    database().ref(`users/${user.uid}`).update({myStatus});
+    // database().ref(`users/${user.uid}`).update({myStatus});
     setMyStatus('');
   }
 
@@ -145,7 +145,7 @@ const Profile = (props) => {
       return;
     }
 
-    database().ref(`users/${user.uid}`).update({phone});
+    // database().ref(`users/${user.uid}`).update({phone});
     setPhone('');
   }  
  

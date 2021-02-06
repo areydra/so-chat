@@ -3,7 +3,7 @@ import {SafeAreaView, StyleSheet, View, Text, Dimensions, Image, TouchableOpacit
 import {Thumbnail} from 'native-base';
 import MapView, {Marker} from 'react-native-maps';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
 import toArray from 'lodash/toArray';
 
 const { width } = Dimensions.get('window')
@@ -27,10 +27,10 @@ const Map = (props) => {
             return setUsers([props.route.params?.person]);
         }
 
-        database().ref('users').on('value', users => {
-            let filteredUsers = toArray(users.val()).filter(user => user.location);
-            setUsers(filteredUsers);
-        });
+        // database().ref('users').on('value', users => {
+        //     let filteredUsers = toArray(users.val()).filter(user => user.location);
+        //     setUsers(filteredUsers);
+        // });
     }
 
     const getAvatar = person => {
