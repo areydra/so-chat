@@ -3,6 +3,7 @@
 .DS_Store
 key.js
 android/app/google-services.json
+android/app/debug.keystore
 
 # Xcode
 #
