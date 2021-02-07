@@ -5,8 +5,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Friends, Messages, Profile, Chat, Map, Register, Splash } from '../screens';
-import { LoginScreen } from '../src/screens';
+import { Friends, Messages, Profile, Chat, Map, Splash } from '../screens';
+import { LoginScreen, PhoneNumberVerificationScreen } from '../src/screens';
+
+import Color from '../src/constants/Colors';
 import {AuthContext} from '../context';
 
 const { width } = Dimensions.get('window');
@@ -16,14 +18,26 @@ const Tab = createMaterialTopTabNavigator();
 
 const AuthStack = () => (
   <Stack.Navigator 
-    initialRouteName="LoginScreen" 
-    headerMode="none">
+    initialRouteName="LoginScreen">
     <Stack.Screen 
       name="LoginScreen" 
-      component={LoginScreen}/>
+      component={LoginScreen}
+      options={{
+        headerShown: false,
+      }}/>
     <Stack.Screen 
-      name="Register" 
-      component={Register}/>
+      name="PhoneNumberVerificationScreen" 
+      component={PhoneNumberVerificationScreen}
+      options={{
+        title: 'Phone Number Verification',
+        headerTitleStyle: {
+          color: Color.white,
+          alignSelf: 'center',
+        },
+        headerStyle: {
+          backgroundColor: Color.main,
+        }
+      }}/>
   </Stack.Navigator>
 )
 

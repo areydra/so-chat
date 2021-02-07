@@ -1,3 +1,4 @@
-import LoginScreen from './LoginScreen'
+import LoginScreen from './LoginScreen';
+import PhoneNumberVerificationScreen from './PhoneNumberVerificationScreen';
 
-export { LoginScreen };
+export { LoginScreen, PhoneNumberVerificationScreen };
