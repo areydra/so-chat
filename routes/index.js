@@ -1,11 +1,12 @@
 import React, {useState, useMemo, useEffect} from 'react';
-import { Dimensions, PermissionsAndroid } from 'react-native';
+import { Alert, Dimensions, PermissionsAndroid } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Friends, Messages, Profile, Chat, Map, Login, Register, Splash } from '../screens';
+import { Friends, Messages, Profile, Chat, Map, Register, Splash } from '../screens';
+import { LoginScreen } from '../src/screens';
 import {AuthContext} from '../context';
 
 const { width } = Dimensions.get('window');
@@ -15,11 +16,11 @@ const Tab = createMaterialTopTabNavigator();
 
 const AuthStack = () => (
   <Stack.Navigator 
-    initialRouteName="Login" 
+    initialRouteName="LoginScreen" 
     headerMode="none">
     <Stack.Screen 
-      name="Login" 
-      component={Login}/>
+      name="LoginScreen" 
+      component={LoginScreen}/>
     <Stack.Screen 
       name="Register" 
       component={Register}/>
@@ -109,9 +110,28 @@ const Router = () => {
 
   const requestLocationPermission = () => {
     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
-        .then(permission => setPermission(permission))
+        .then(permission => {
+          if (permission === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+            showAlertPermissionNotGranted();
+          }
+
+          setPermission(permission)
+        })
         .catch(err => console.warn(err));
   };
+
+  const showAlertPermissionNotGranted = () => {
+    Alert.alert(
+        'Failed',
+        'You must be granted location permission',
+        [
+          {
+            style: 'destructive', 
+            onPress: () => checkPermission() 
+          }
+        ]
+    );
+  }
 
   const checkIsSignedIn = () => {
     if (!auth().currentUser?.uid) {
