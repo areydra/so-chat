@@ -18,17 +18,25 @@ const styles = StyleSheet.create({
     },
     containerInput: {
         flex: 1,
-    },
-    input: {
-        fontSize: 18,
+        flexDirection: 'row',
+        alignItems: 'center',
         marginRight: 4,
-        textAlign: 'center',
         borderWidth: 2,
         borderRadius: 4,
         borderColor: Color.main,
     },
-    inputError: {
+    containerInputError: {
         borderColor: Color.red,
+    },
+    icon: {
+        width: 40,
+        height: 40,
+        resizeMode: 'contain',
+        marginHorizontal: 4,
+    },
+    input: {
+        flex: 1,
+        fontSize: 18,
     },
     containerButton: {
         borderTopRightRadius: 50,
@@ -37,6 +45,8 @@ const styles = StyleSheet.create({
         backgroundColor: Color.main,
         width: 50,
         height: 50,
+        borderWidth: 2,
+        borderColor: Color.main,
     },
     textButton: {
         color: Color.white,

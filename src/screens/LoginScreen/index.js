@@ -6,11 +6,13 @@ import {
     View, 
     Text, 
     TextInput, 
-    ActivityIndicator 
+    ActivityIndicator,
+    Image,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
 import styles from './styles';
+import Icon from '../../assets/icons';
 import {witContext} from '../../../context';
 
 const TEXT = {
@@ -46,7 +48,8 @@ const LoginScreen = props => {
     }
 
     const localValidation = () => {
-        const isValidPhoneNumber = (/\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{8})/g).test(phoneNumber);
+        const isIndonesiaPhoneNumber = /^(^\+62|62|081|082|083|085|087|088|089)(\d{3,4}-?){2}\d{3,4}$/g;
+        const isValidPhoneNumber = isIndonesiaPhoneNumber.test(phoneNumber);
 
         if (!phoneNumber) {
             setErrorMessage('Phone number cannot be null!');
@@ -62,7 +65,7 @@ const LoginScreen = props => {
     }
 
     const signIn = () => {
-        auth().signInWithPhoneNumber(phoneNumber).then(confirmation => {
+        auth().signInWithPhoneNumber(indonesiaPhoneNumber(phoneNumber)).then(confirmation => {
             props.navigation.navigate('PhoneNumberVerificationScreen', {confirmation});
         }).catch(err => {
             setPhoneNumber(null);
@@ -72,21 +75,37 @@ const LoginScreen = props => {
         setIsLoading(false);
     }
 
-    const getStylesTextInput = () => {
-        if (errorMessage) {
-            return [styles.input, styles.inputError];
+    const indonesiaPhoneNumber = (phoneNumber) => {
+        if (phoneNumber.startsWith('08')) {
+            return phoneNumber.replace('0', '+62');
         }
 
-        return styles.input;
+        if (phoneNumber.startsWith('62')) {
+            return `+${phoneNumber}`;
+        }
+
+        return phoneNumber;
+    }
+
+    const getStylesTextInput = () => {
+        if (errorMessage) {
+            return [styles.containerInput, styles.containerInputError];
+        }
+
+        return styles.containerInput;
     }
 
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>{TEXT.title}</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <View style={styles.containerInput}>
+                <View style={getStylesTextInput()}>
+                    <Image
+                        source={Icon.indonesiaFlag}
+                        style={styles.icon}
+                    />
                     <TextInput 
-                        style={getStylesTextInput()}
+                        style={styles.input}
                         placeholder='Your phone number'
                         value={phoneNumber}
                         keyboardType='phone-pad'
