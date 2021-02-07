@@ -50,10 +50,10 @@ const PhoneNumberVerificationScreen = props => {
     const verifyPhoneNumber = async() => {
         try {
             await props.route.params?.confirmation?.confirm(verificationCode);
-            props.signIn(true);    
+            props.signIn(true);
         } catch(err) {
             setIsLoading(false);
-            setErrorMessage(err);
+            setErrorMessage('Invalid verification code!');
         }
     }
 
