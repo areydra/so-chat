@@ -64,8 +64,8 @@ const LoginScreen = props => {
         return true;
     }
 
-    const signIn = () => {
-        auth().signInWithPhoneNumber(indonesiaPhoneNumber(phoneNumber)).then(confirmation => {
+    const signIn = async() => {
+        await auth().signInWithPhoneNumber(indonesiaPhoneNumber(phoneNumber)).then(confirmation => {
             props.navigation.navigate('PhoneNumberVerificationScreen', {confirmation});
         }).catch(err => {
             setPhoneNumber(null);
