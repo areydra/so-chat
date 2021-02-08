@@ -6,4 +6,5 @@ export default {
     marker: require('./marker.png'),
     send: require('./send.png'),
     arrowBackWhite: require('./arrowBackWhite.png'),
+    checkList: require('./checkList.png'),
 };

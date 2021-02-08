@@ -3,6 +3,7 @@ import PhoneNumberVerificationScreen from './PhoneNumberVerificationScreen';
 import AccountInformationScreen from './AccountInformationScreen';
 import FriendsScreen from './FriendsScreen';
 import ChatScreen from './ChatScreen';
+import MessagesScreen from './MessagesScreen';
 
 export {
     LoginScreen,
@@ -10,4 +11,5 @@ export {
     AccountInformationScreen,
     FriendsScreen,
     ChatScreen,
+    MessagesScreen,
 };

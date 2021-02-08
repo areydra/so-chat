@@ -5,13 +5,14 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Messages, Map, Splash } from '../screens';
+import { Map, Splash } from '../screens';
 import {
   LoginScreen,
   PhoneNumberVerificationScreen,
   AccountInformationScreen,
   FriendsScreen,
   ChatScreen,
+  MessagesScreen,
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
@@ -92,7 +93,7 @@ const Swipe = () => (
       component={FriendsScreen}/>
     <Tab.Screen 
       name="Messages" 
-      component={Messages}/>
+      component={MessagesScreen}/>
     <Tab.Screen 
       name="Profile" 
       component={ProfileScreen}/>
