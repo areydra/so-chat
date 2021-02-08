@@ -86,7 +86,7 @@ const ChatScreen = ({route, navigation}) => {
         };
         const payloadFriendChatRooms = {
             photo: user?.photoURL,
-            name: user?.name,
+            name: user?.displayName,
             lastMessage: payloadMessage,
         };
         
