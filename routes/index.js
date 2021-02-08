@@ -5,8 +5,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Friends, Messages, Chat, Map, Splash } from '../screens';
-import { LoginScreen, PhoneNumberVerificationScreen, AccountInformationScreen } from '../src/screens';
+import { Messages, Chat, Map, Splash } from '../screens';
+import {
+  LoginScreen,
+  PhoneNumberVerificationScreen,
+  AccountInformationScreen,
+  FriendsScreen
+} from '../src/screens';
 
 import Color from '../src/constants/Colors';
 import {AuthContext} from '../context';
@@ -83,7 +88,7 @@ const Swipe = () => (
     }}>
     <Tab.Screen 
       name="Friends" 
-      component={Friends}/>
+      component={FriendsScreen}/>
     <Tab.Screen 
       name="Messages" 
       component={Messages}/>
