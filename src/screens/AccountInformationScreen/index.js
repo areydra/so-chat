@@ -160,13 +160,13 @@ const AccountInformationScreen = (props) => {
 
     if (imageUri) {
       return {
-        collection: {imageUri, ...defaultCollection},
+        collection: {photo: imageUri, ...defaultCollection},
         authentication: {photoURL: imageUri, ...defaultAuthentication},
       };
     }
 
     return {
-      collection: {imageUri: user?.photoURL, ...defaultCollection},
+      collection: {photo: user?.photoURL, ...defaultCollection},
       authentication: defaultAuthentication,
     };
   }
