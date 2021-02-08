@@ -89,8 +89,12 @@ const Swipe = () => (
       component={Messages}/>
     <Tab.Screen 
       name="Profile" 
-      component={Profile}/>
+      component={ProfileScreen}/>
   </Tab.Navigator>
+)
+
+const ProfileScreen = () => (
+  <AccountInformationScreen isProfile={true}/>
 )
 
 const HomeStack = () => (

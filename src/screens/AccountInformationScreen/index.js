@@ -34,14 +34,15 @@ const TEXT = {
 }
 
 const user = FirebaseAuth().currentUser;
+const defaultAvatar = user?.photoURL ? {uri: user.photoURL} : Icon.avatar;
 
 const AccountInformationScreen = (props) => {
-  const [name, setName] = useState(null);
+  const [name, setName] = useState(user?.displayName);
   const [error, setError] = useState(null);
   const [location, setLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState(false);
-  const [avatar, setAvatar] = useState(Icon.avatar);
+  const [avatar, setAvatar] = useState(null);
 
   useEffect(() => {
     getLocation();
@@ -131,25 +132,59 @@ const AccountInformationScreen = (props) => {
   }
 
   const saveAccountInformation = async(imageUri) => {
-    await FirebaseAuth().currentUser.updateProfile({displayName: name});
-    await FirebaseFirestore().collection('users').doc(user.uid).set({
-        name,
-        imageUri,
-        location,
-        status: 'Online',
-        phone: user.phoneNumber,
-    });
+    const payload = getPayloadAccountInformation(imageUri);
 
-    props.signIn(true);
+    await FirebaseAuth().currentUser.updateProfile(payload.authentication);
+
+    if (props.isProfile) {
+      await FirebaseFirestore().collection('users').doc(user.uid).update(payload.collection);
+    } else {
+      await FirebaseFirestore().collection('users').doc(user.uid).set(payload.collection);
+      props.signIn(true);
+    }
+
     setIsLoading(false);
   };
 
+  const getPayloadAccountInformation = (imageUri) => {
+    let defaultCollection = {
+      name,
+      location,
+      status: 'Online',
+      phone: user.phoneNumber,
+    };
+
+    let defaultAuthentication = {
+      displayName: name,
+    };
+
+    if (imageUri) {
+      return {
+        collection: {imageUri, ...defaultCollection},
+        authentication: {photoURL: imageUri, ...defaultAuthentication},
+      };
+    }
+
+    return {
+      collection: {imageUri: user?.photoURL, ...defaultCollection},
+      authentication: defaultAuthentication,
+    };
+  }
+
+  const getStyleContainer = () => {
+    if (props.isProfile) {
+      return styles.containerProfile;
+    }
+
+    return styles.container;
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={getStyleContainer()}>
       <TouchableOpacity onPress={changeAvatar}>
         <View style={styles.imageProfile}>
           <Image 
-            source={avatar} 
+            source={avatar ?? defaultAvatar} 
             style={styles.iconAvatar}/>
           <Image 
             source={Icon.camera} 

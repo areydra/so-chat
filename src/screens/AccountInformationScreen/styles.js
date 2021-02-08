@@ -6,6 +6,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center'
   },
+  containerProfile: {
+    flex: 1,
+  },
   imageProfile: {
     height: 140,
     width: 140,
