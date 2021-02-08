@@ -225,9 +225,9 @@ const Styles = StyleSheet.create({
     flex: 1,
   },
   imageProfile: {
-    height: width / 3,
-    width: width / 3,
-    borderRadius: width / 3,
+    height: 140,
+    width: 140,
+    borderRadius: 70,
     alignSelf: 'center',
     marginTop: width / 10,
     overflow: 'hidden',
@@ -280,15 +280,14 @@ const Styles = StyleSheet.create({
   iconAvatar: {
     width: '100%', 
     height: '100%', 
-    resizeMode: 'contain',
   },
   iconCamera: {
-      height: 20,
-      width: 20,
-      bottom: 0,
-      left: 58,
-      position: 'absolute',
-  }
+    height: 20,
+    width: 20,
+    bottom: 0,
+    alignSelf: 'center',
+    position: 'absolute',
+  },
 });
 
 export default witContext(Profile);
