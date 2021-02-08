@@ -6,7 +6,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import auth from '@react-native-firebase/auth'
 
 import { Friends, Messages, Profile, Chat, Map, Splash } from '../screens';
-import { LoginScreen, PhoneNumberVerificationScreen } from '../src/screens';
+import { LoginScreen, PhoneNumberVerificationScreen, AccountInformationScreen } from '../src/screens';
 
 import Color from '../src/constants/Colors';
 import {AuthContext} from '../context';
@@ -16,30 +16,45 @@ const { width } = Dimensions.get('window');
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
-const AuthStack = () => (
-  <Stack.Navigator 
-    initialRouteName="LoginScreen">
-    <Stack.Screen 
-      name="LoginScreen" 
-      component={LoginScreen}
-      options={{
-        headerShown: false,
-      }}/>
-    <Stack.Screen 
-      name="PhoneNumberVerificationScreen" 
-      component={PhoneNumberVerificationScreen}
-      options={{
-        title: 'Phone Number Verification',
-        headerTitleStyle: {
-          color: Color.white,
-          alignSelf: 'center',
-        },
-        headerStyle: {
-          backgroundColor: Color.main,
-        }
-      }}/>
-  </Stack.Navigator>
-)
+const AuthStack = () => {
+  let initialRouteName = "LoginScreen";
+  let shouldHaveDisplayName = auth().currentUser && !auth().currentUser.displayName;
+
+  if (shouldHaveDisplayName) {
+    initialRouteName="AccountInformationScreen";
+  }
+
+  return (
+    <Stack.Navigator
+      initialRouteName={initialRouteName}>
+      <Stack.Screen
+        name="LoginScreen"
+        component={LoginScreen}
+        options={{
+          headerShown: false,
+        }}/>
+      <Stack.Screen
+        name="PhoneNumberVerificationScreen"
+        component={PhoneNumberVerificationScreen}
+        options={{
+          title: 'Phone Number Verification',
+          headerTitleStyle: {
+            color: Color.white,
+            alignSelf: 'center',
+          },
+          headerStyle: {
+            backgroundColor: Color.main,
+          }
+        }}/>
+        <Stack.Screen
+          name="AccountInformationScreen"
+          component={AccountInformationScreen}
+          options={{
+            headerShown: false,
+          }}/>
+    </Stack.Navigator>
+  )
+}
 
 const Swipe = () => (
   <Tab.Navigator 
@@ -148,7 +163,7 @@ const Router = () => {
   }
 
   const checkIsSignedIn = () => {
-    if (!auth().currentUser?.uid) {
+    if (!auth().currentUser?.uid || !auth().currentUser.displayName) {
       return;
     }
 

@@ -50,7 +50,7 @@ const PhoneNumberVerificationScreen = props => {
     const verifyPhoneNumber = async() => {
         try {
             await props.route.params?.confirmation?.confirm(verificationCode);
-            props.signIn(true);
+            navigateToAccountInformationScreen();
         } catch(err) {
             setIsLoading(false);
             setErrorMessage('Invalid verification code!');
@@ -68,6 +68,12 @@ const PhoneNumberVerificationScreen = props => {
     const navigateToLoginScreen = () => {
         props.navigation.dispatch(
             StackActions.replace('LoginScreen')
+        );
+    }
+
+    const navigateToAccountInformationScreen = () => {
+        props.navigation.dispatch(
+            StackActions.replace('AccountInformationScreen')
         );
     }
 
