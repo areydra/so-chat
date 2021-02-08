@@ -3,7 +3,7 @@ import {View, Text} from 'react-native';
 
 import styles from '../styles';
 
-const ChatCard = ({message, time, isMessageFromFriend, index}) => {
+const Card = ({message, time, isMessageFromFriend}) => {
     const getStyles = () => {
         return {
             container: isMessageFromFriend ? styles.messageFriendContainer : styles.messageUserContainer,
@@ -20,4 +20,4 @@ const ChatCard = ({message, time, isMessageFromFriend, index}) => {
     );
 }
 
-export default ChatCard;
+export default Card;

@@ -4,4 +4,6 @@ export default {
     camera: require('./camera.png'),
     search: require('./search.png'),
     marker: require('./marker.png'),
+    send: require('./send.png'),
+    arrowBackWhite: require('./arrowBackWhite.png'),
 };

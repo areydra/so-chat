@@ -5,12 +5,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Messages, Chat, Map, Splash } from '../screens';
+import { Messages, Map, Splash } from '../screens';
 import {
   LoginScreen,
   PhoneNumberVerificationScreen,
   AccountInformationScreen,
-  FriendsScreen
+  FriendsScreen,
+  ChatScreen,
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
@@ -109,7 +110,7 @@ const HomeStack = () => (
       component={Swipe}/>
     <Stack.Screen 
       name="Chat" 
-      component={Chat}/>
+      component={ChatScreen}/>
     <Stack.Screen 
       name="Map" 
       component={Map}/>

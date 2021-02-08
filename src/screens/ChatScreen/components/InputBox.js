@@ -2,12 +2,13 @@ import React, {useState} from 'react';
 import {Image, TouchableOpacity, View, TextInput} from 'react-native';
 
 import styles from '../styles';
+import Icon from '../../../assets/icons';
 
 const TEXT = {
     placeholder: 'Tell me. U love me'
 }
 
-const TextInputChat = ({handleSendMessage}) => {
+const InputBox = ({handleSendMessage}) => {
     const [message, setMessage] = useState('');
 
     const submit = () => {  
@@ -27,10 +28,10 @@ const TextInputChat = ({handleSendMessage}) => {
             <TouchableOpacity 
                 onPress={submit}
                 style={styles.send}>
-                <Image source={require('../../../assets/icons/send.png')}/>
+                <Image source={Icon.send}/>
             </TouchableOpacity>
         </View>                 
     );
 }
 
-export default TextInputChat;
+export default InputBox;
