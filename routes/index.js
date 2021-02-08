@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Friends, Messages, Profile, Chat, Map, Splash } from '../screens';
+import { Friends, Messages, Chat, Map, Splash } from '../screens';
 import { LoginScreen, PhoneNumberVerificationScreen, AccountInformationScreen } from '../src/screens';
 
 import Color from '../src/constants/Colors';
