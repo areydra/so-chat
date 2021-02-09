@@ -1,5 +1,5 @@
 import React, {useState, useMemo, useEffect} from 'react';
-import { Alert, Dimensions, PermissionsAndroid } from 'react-native';
+import { Dimensions } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
