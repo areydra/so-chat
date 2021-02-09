@@ -100,12 +100,16 @@ const AccountInformationScreen = (props) => {
 
   const getAccountInformation = async() => {
     const currentUser = await FirebaseFirestore().collection('users').doc(user.uid).get();
-    const defaultAvatar = currentUser.data().photo ? {uri: currentUser.data().photo} : Icon.avatar;
 
-    setDefaultAvatar(defaultAvatar);
+    if (!currentUser.data()) {
+      setDefaultAvatar(Icon.avatar);
+      return;
+    }
+
     setName(currentUser.data().name);
     setAbout(currentUser.data().about);
     setPhoneNumber(currentUser.data().phoneNumber);
+    setDefaultAvatar({uri: currentUser.data().photo});
   }
 
   const changeAvatar = () => {
