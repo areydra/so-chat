@@ -31,14 +31,15 @@ const IMAGE_PICKER_OPTIONS = {
 const TEXT = {
   name: 'Your name',
   about: 'About you',
+  phoneNumber: 'Your phone number',
   button: 'Save'
 }
 
-const user = FirebaseAuth().currentUser;
-
 const AccountInformationScreen = (props) => {
   const [name, setName] = useState(null);
+  const [user, setUser] = useState(null);
   const [about, setAbout] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState(null);
   const [error, setError] = useState(null);
   const [location, setLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,10 +48,14 @@ const AccountInformationScreen = (props) => {
   const [defaultAvatar, setDefaultAvatar] = useState(null);
 
   useEffect(() => {
+    setUser(FirebaseAuth().currentUser);
+  }, [])
+
+  useEffect(() => {
     getLocation();
     getAccountInformation();
     checkPermission();
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if (!error) {
@@ -100,6 +105,7 @@ const AccountInformationScreen = (props) => {
     setDefaultAvatar(defaultAvatar);
     setName(currentUser.data().name);
     setAbout(currentUser.data().about);
+    setPhoneNumber(currentUser.data().phoneNumber);
   }
 
   const changeAvatar = () => {
@@ -164,7 +170,7 @@ const AccountInformationScreen = (props) => {
       about,
       location,
       status: 'Online',
-      phone: user.phoneNumber,
+      phoneNumber,
     };
 
     let defaultAuthentication = {
@@ -217,7 +223,8 @@ const AccountInformationScreen = (props) => {
           onChangeText={setAbout}/>
         <TextInput
           style={styles.textInput}
-          value={(user?.phoneNumber).replace('+62', '0')}
+          value={phoneNumber?.replace('+62', '0')}
+          placeholder={TEXT.phoneNumber}
           editable={false}/>
         {error && (
           <Text style={styles.textError}>{error}</Text>
