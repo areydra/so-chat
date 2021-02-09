@@ -13,7 +13,7 @@ import auth from '@react-native-firebase/auth';
 
 import styles from './styles';
 import Icon from '../../assets/icons';
-import {witContext} from '../../../context';
+import {connect} from '../../../context';
 
 const TEXT = {
     title: 'So Chat',
@@ -133,4 +133,4 @@ const LoginScreen = props => {
     );
 };
 
-export default witContext(LoginScreen);
+export default connect(LoginScreen);

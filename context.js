@@ -1,14 +1,14 @@
 import React from 'react';
 
-const AuthContext = React.createContext();
+const Context = React.createContext();
 
-const witContext = Component => props => (
-    <AuthContext.Consumer>
+const connect = Component => props => (
+    <Context.Consumer>
         {state => <Component {...props} {...state} />}
-    </AuthContext.Consumer>
+    </Context.Consumer>
 )
 
 export {
-    AuthContext,
-    witContext
+    Context,
+    connect
 };

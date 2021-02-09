@@ -17,7 +17,7 @@ import FirebaseFirestore from '@react-native-firebase/firestore';
 
 import styles from './styles';
 import Icon from '../../assets/icons';
-import {witContext} from '../../../context';
+import {connect} from '../../../context';
 
 const IMAGE_PICKER_OPTIONS = {
   title: 'Select Image',
@@ -249,4 +249,4 @@ const AccountInformationScreen = (props) => {
   );
 }
 
-export default witContext(AccountInformationScreen);
+export default connect(AccountInformationScreen);

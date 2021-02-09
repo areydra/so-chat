@@ -12,7 +12,7 @@ import { StackActions } from '@react-navigation/native';
 
 import styles from './styles';
 import Color from '../../constants/Colors';
-import {witContext} from '../../../context';
+import {connect} from '../../../context';
 
 const TEXT = {
     wrongPhoneNumber: 'Wrong phone number? ',
@@ -128,4 +128,4 @@ const PhoneNumberVerificationScreen = props => {
     );
 };
 
-export default witContext(PhoneNumberVerificationScreen);
+export default connect(PhoneNumberVerificationScreen);
