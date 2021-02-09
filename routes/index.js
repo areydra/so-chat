@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Map, Splash } from '../screens';
+import { Map } from '../screens';
 import {
   LoginScreen,
   PhoneNumberVerificationScreen,
@@ -13,6 +13,7 @@ import {
   FriendsScreen,
   ChatScreen,
   MessagesScreen,
+  SplashScreen,
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
@@ -188,7 +189,7 @@ const Router = () => {
   }), []);
 
   if (isLoading) {
-    return <Splash/>
+    return <SplashScreen/>
   }
 
   return (
