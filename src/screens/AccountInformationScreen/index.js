@@ -30,22 +30,25 @@ const IMAGE_PICKER_OPTIONS = {
 
 const TEXT = {
   name: 'Your name',
+  about: 'About you',
   button: 'Save'
 }
 
 const user = FirebaseAuth().currentUser;
-const defaultAvatar = user?.photoURL ? {uri: user.photoURL} : Icon.avatar;
 
 const AccountInformationScreen = (props) => {
-  const [name, setName] = useState(user?.displayName);
+  const [name, setName] = useState(null);
+  const [about, setAbout] = useState(null);
   const [error, setError] = useState(null);
   const [location, setLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState(false);
   const [avatar, setAvatar] = useState(null);
+  const [defaultAvatar, setDefaultAvatar] = useState(null);
 
   useEffect(() => {
     getLocation();
+    getAccountInformation();
     checkPermission();
   }, [])
 
@@ -88,6 +91,15 @@ const AccountInformationScreen = (props) => {
         longitude: position.coords.longitude,
       })
     })
+  }
+
+  const getAccountInformation = async() => {
+    const currentUser = await FirebaseFirestore().collection('users').doc(user.uid).get();
+    const defaultAvatar = currentUser.data().photo ? {uri: currentUser.data().photo} : Icon.avatar;
+
+    setDefaultAvatar(defaultAvatar);
+    setName(currentUser.data().name);
+    setAbout(currentUser.data().about);
   }
 
   const changeAvatar = () => {
@@ -149,6 +161,7 @@ const AccountInformationScreen = (props) => {
   const getPayloadAccountInformation = (imageUri) => {
     let defaultCollection = {
       name,
+      about,
       location,
       status: 'Online',
       phone: user.phoneNumber,
@@ -197,6 +210,11 @@ const AccountInformationScreen = (props) => {
           placeholder={TEXT.name}
           defaultValue={name}
           onChangeText={setName}/>
+        <TextInput
+          style={styles.textInput}
+          placeholder={TEXT.about}
+          defaultValue={about}
+          onChangeText={setAbout}/>
         <TextInput
           style={styles.textInput}
           value={(user?.phoneNumber).replace('+62', '0')}
