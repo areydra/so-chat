@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     },
     title: {
         flex: 1,
-        marginLeft: -20,
+        marginRight: 20,
         textAlign: 'center',
     },
     locationContainer: {
