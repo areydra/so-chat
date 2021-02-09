@@ -27,30 +27,30 @@ const Card = ({photo, name, about, location, navigateToChatScreen, navigateToMap
     }
 
     return (
-        <View style={styles.cardContainer}>
-            <View style={styles.cardContainerAvatar}>
-                <Image
-                    source={getAvatar()}
-                    style={styles.cardAvatar}/>
-            </View>
-            <View style={styles.cardContainerContent}>
-                <TouchableOpacity onPress={navigateToChatScreen}>
+        <TouchableOpacity onPress={navigateToChatScreen}>
+            <View style={styles.cardContainer}>
+                <View style={styles.cardContainerAvatar}>
+                    <Image
+                        source={getAvatar()}
+                        style={styles.cardAvatar}/>
+                </View>
+                <View style={styles.cardContainerContent}>
                     <Text style={styles.cardTextName}>{getName()}</Text>
-                </TouchableOpacity>
-                <View style={styles.cardContainerTextAbout}>
-                    <Text>{about}</Text>
+                    <View style={styles.cardContainerTextAbout}>
+                        <Text>{about}</Text>
+                    </View>
                 </View>
+                {location && (
+                    <View style={styles.cardContainerIconMarker}>
+                        <TouchableOpacity onPress={navigateToMapScreen}>
+                            <Image
+                                source={Icon.marker}
+                                style={styles.cardIconMarker}/>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
-            {location && (
-                <View style={styles.cardContainerIconMarker}>
-                    <TouchableOpacity onPress={navigateToMapScreen}>
-                        <Image
-                            source={Icon.marker}
-                            style={styles.cardIconMarker}/>
-                    </TouchableOpacity>
-                </View>
-            )}
-        </View>
+        </TouchableOpacity>
     );
 };
 
