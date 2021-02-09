@@ -8,4 +8,5 @@ export default {
     arrowBackWhite: require('./arrowBackWhite.png'),
     arrowBackBlack: require('./arrowBackBlack.png'),
     checkList: require('./checkList.png'),
+    unread: require('./unread.png'),
 };
