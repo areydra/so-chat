@@ -20,7 +20,7 @@ const Card = ({photo, name, message, time, navigateToChatScreen, shouldShowIcon}
                     <Text>{message}</Text>
                     {shouldShowIcon && (
                         <Image 
-                            source={Icon.checkList} 
+                            source={Icon.read} 
                             style={styles.cardIcon}/>
                     )}
                 </View>

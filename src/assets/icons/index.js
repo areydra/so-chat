@@ -7,6 +7,6 @@ export default {
     send: require('./send.png'),
     arrowBackWhite: require('./arrowBackWhite.png'),
     arrowBackBlack: require('./arrowBackBlack.png'),
-    checkList: require('./checkList.png'),
+    read: require('./read.png'),
     unread: require('./unread.png'),
 };
