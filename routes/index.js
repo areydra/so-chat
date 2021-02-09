@@ -122,57 +122,10 @@ const HomeStack = () => (
 const Router = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [permission, setPermission] = useState(null);
 
   useEffect(() => {
     checkIsSignedIn();
-    checkPermission();
-      
-    return checkPermission();
   }, [])
-
-  useEffect(() => {
-    if(permission !== PermissionsAndroid.RESULTS.GRANTED) {
-      return;
-    }
-
-    setIsLoading(false);
-  }, [permission])
-
-  const checkPermission = () => {
-    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(locationPermission => {
-        if(locationPermission){
-            setPermission(PermissionsAndroid.RESULTS.GRANTED);
-        }else{
-            requestLocationPermission();
-        } 
-    })
-  }
-
-  const requestLocationPermission = () => {
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
-        .then(permission => {
-          if (permission === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-            showAlertPermissionNotGranted();
-          }
-
-          setPermission(permission)
-        })
-        .catch(err => console.warn(err));
-  };
-
-  const showAlertPermissionNotGranted = () => {
-    Alert.alert(
-        'Failed',
-        'You must be granted location permission',
-        [
-          {
-            style: 'destructive', 
-            onPress: () => checkPermission() 
-          }
-        ]
-    );
-  }
 
   const checkIsSignedIn = () => {
     if (!auth().currentUser?.uid || !auth().currentUser.displayName) {
@@ -186,10 +139,17 @@ const Router = () => {
     signIn: isSignedIn => {
       setIsSignedIn(isSignedIn);
     },
+    isLoading: isLoading => {
+      setIsLoading(isLoading);
+    }
   }), []);
 
   if (isLoading) {
-    return <SplashScreen/>
+    return (
+      <AuthContext.Provider value={contextValue}>
+        <SplashScreen/>
+      </AuthContext.Provider>
+    );
   }
 
   return (
