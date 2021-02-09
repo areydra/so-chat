@@ -182,7 +182,7 @@ const Router = () => {
     setIsSignedIn(true);
   }
 
-  const authContext = useMemo(() => ({
+  const contextValue = useMemo(() => ({
     signIn: isSignedIn => {
       setIsSignedIn(isSignedIn);
     },
@@ -193,7 +193,7 @@ const Router = () => {
   }
 
   return (
-    <AuthContext.Provider value={authContext}>
+    <AuthContext.Provider value={contextValue}>
       <NavigationContainer>
         <Stack.Navigator>
           {!isSignedIn ? (
