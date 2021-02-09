@@ -5,7 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import auth from '@react-native-firebase/auth'
 
-import { Map } from '../screens';
 import {
   LoginScreen,
   PhoneNumberVerificationScreen,
@@ -14,6 +13,7 @@ import {
   ChatScreen,
   MessagesScreen,
   SplashScreen,
+  MapScreen,
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
@@ -115,7 +115,7 @@ const HomeStack = () => (
       component={ChatScreen}/>
     <Stack.Screen 
       name="Map" 
-      component={Map}/>
+      component={MapScreen}/>
   </Stack.Navigator>
 )
 

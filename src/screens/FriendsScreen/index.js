@@ -56,12 +56,13 @@ const FriendsScreen = (props) => {
         setFilteredFriends(filteredFriends);
     }
 
-    const navigateToMapScreen = (person) => {
-        if (!person) {
-            props.navigation.navigate('Map', {show: 'all'});
+    const navigateToMapScreen = (users) => {
+        if (!users?.id) {
+            props.navigation.navigate('Map', {show: 'all', users: friends});
+            return;
         }
 
-        props.navigation.navigate('Map', {person});
+        props.navigation.navigate('Map', {users: [users]});
     }
 
     const navigateToChatScreen = (item) => {

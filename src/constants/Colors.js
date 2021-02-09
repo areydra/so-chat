@@ -5,5 +5,6 @@ export default {
     black: 'black',
     grey: '#E3E3E3',
     red: 'red',
+    greenStabilo: '#00ff2f',
     transparent: 'transparent',
 }

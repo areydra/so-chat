@@ -5,6 +5,7 @@ import FriendsScreen from './FriendsScreen';
 import ChatScreen from './ChatScreen';
 import MessagesScreen from './MessagesScreen';
 import SplashScreen from './SplashScreen';
+import MapScreen from './MapScreen';
 
 export {
     LoginScreen,
@@ -14,4 +15,5 @@ export {
     ChatScreen,
     MessagesScreen,
     SplashScreen,
+    MapScreen,
 };
