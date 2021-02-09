@@ -160,8 +160,7 @@ const Router = () => {
             <Stack.Screen 
               name="Auth" 
               component={AuthStack} 
-              options={() => ({headerShown: false})}
-              setIsSignedIn={setIsSignedIn}/> 
+              options={() => ({headerShown: false})}/> 
           ):(
             <Stack.Screen 
               name="Home" 
