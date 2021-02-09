@@ -17,7 +17,7 @@ import {
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
-import {AuthContext} from '../context';
+import {Context} from '../context';
 
 const { width } = Dimensions.get('window');
 
@@ -146,14 +146,14 @@ const Router = () => {
 
   if (isLoading) {
     return (
-      <AuthContext.Provider value={contextValue}>
+      <Context.Provider value={contextValue}>
         <SplashScreen/>
-      </AuthContext.Provider>
+      </Context.Provider>
     );
   }
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <Context.Provider value={contextValue}>
       <NavigationContainer>
         <Stack.Navigator>
           {!isSignedIn ? (
@@ -170,7 +170,7 @@ const Router = () => {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-    </AuthContext.Provider>
+    </Context.Provider>
   )
 }
 
