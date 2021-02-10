@@ -6,7 +6,7 @@ import {
   LoginScreen,
   PhoneNumberVerificationScreen,
   AccountInformationScreen,
-} from '../../src/screens';
+} from '../../../src/screens';
 
 import styles from './styles';
 
