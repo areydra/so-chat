@@ -1,5 +1,6 @@
 import React, {useState, useMemo, useEffect} from 'react';
 import { Dimensions } from 'react-native';
+import {Provider} from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -17,6 +18,7 @@ import {
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
+import {store} from '../redux';
 import {Context} from '../context';
 
 const { width } = Dimensions.get('window');
@@ -146,14 +148,14 @@ const Router = () => {
 
   if (isLoading) {
     return (
-      <Context.Provider value={contextValue}>
+      <Provider value={store}>
         <SplashScreen/>
-      </Context.Provider>
+      </Provider>
     );
   }
 
   return (
-    <Context.Provider value={contextValue}>
+    <Provider value={store}>
       <NavigationContainer>
         <Stack.Navigator>
           {!isSignedIn ? (
@@ -169,7 +171,7 @@ const Router = () => {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-    </Context.Provider>
+    </Provider>
   )
 }
 
