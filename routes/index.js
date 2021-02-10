@@ -40,7 +40,12 @@ const Router = ({currentUserUid}) => {
         {!isSignedIn ? (
           <Stack.Screen 
             name="Auth" 
-            component={AuthStack} 
+            component={() => (
+              <AuthStack 
+                authUid={authUid}
+                currentUserUid={currentUserUid}
+              />
+            )} 
             options={() => ({headerShown: false})}/> 
         ):(
           <Stack.Screen 
