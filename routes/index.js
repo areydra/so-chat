@@ -1,6 +1,5 @@
 import React, {useState, useMemo, useEffect} from 'react';
 import { Dimensions } from 'react-native';
-import {Provider} from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -18,7 +17,6 @@ import {
 } from '../src/screens';
 
 import Color from '../src/constants/Colors';
-import {store} from '../redux';
 import {Context} from '../context';
 
 const { width } = Dimensions.get('window');
@@ -148,30 +146,26 @@ const Router = () => {
 
   if (isLoading) {
     return (
-      <Provider value={store}>
-        <SplashScreen/>
-      </Provider>
+      <SplashScreen/>
     );
   }
 
   return (
-    <Provider value={store}>
-      <NavigationContainer>
-        <Stack.Navigator>
-          {!isSignedIn ? (
-            <Stack.Screen 
-              name="Auth" 
-              component={AuthStack} 
-              options={() => ({headerShown: false})}/> 
-          ):(
-            <Stack.Screen 
-              name="Home" 
-              options={() => ({headerShown: false})}
-              component={HomeStack}/>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </Provider>
+    <NavigationContainer>
+      <Stack.Navigator>
+        {!isSignedIn ? (
+          <Stack.Screen 
+            name="Auth" 
+            component={AuthStack} 
+            options={() => ({headerShown: false})}/> 
+        ):(
+          <Stack.Screen 
+            name="Home" 
+            options={() => ({headerShown: false})}
+            component={HomeStack}/>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   )
 }
 
