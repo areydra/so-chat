@@ -5,11 +5,12 @@ import {createStackNavigator} from '@react-navigation/stack';
 import AuthStack from './stack/AuthStack';
 import HomeStack from './stack/HomeStack';
 import {SplashScreen} from '../src/screens';
+import {connect} from 'react-redux';
 
 const Stack = createStackNavigator();
 
-const Router = () => {
-  if (isLoading) {
+const Router = ({currentUser}) => {
+  if (!currentUser.uid) {
     return (
       <SplashScreen/>
     );
@@ -34,4 +35,8 @@ const Router = () => {
   )
 }
 
-export default Router;
+const mapStateToProps = ({currentUser}) => ({
+  currentUser,
+});
+
+export default connect(mapStateToProps)(Router);
