@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import FirebaseAuth from '@react-native-firebase/auth';
@@ -16,21 +16,13 @@ const Router = ({currentUserUid}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  useEffect(() => {
-    checkUserHasSignedIn();
-  }, [currentUserUid])
-
-  const checkUserHasSignedIn = () => {
-    const userHasSignedIn = !authUid && !currentUserUid;
-    setIsSignedIn(userHasSignedIn);
-  }
-
   if (isLoading) {
     return (
       <SplashScreen
         authUid={authUid}
         currentUserUid={currentUserUid}
-        setIsLoading={setIsLoading}/>
+        setIsLoading={setIsLoading}
+        setIsSignedIn={setIsSignedIn}/>
     );
   }
 
