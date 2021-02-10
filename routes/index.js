@@ -64,7 +64,7 @@ const AuthStack = () => {
   )
 }
 
-const Swipe = () => (
+const HomeTab = () => (
   <Tab.Navigator 
     initialRouteName="Messages" 
     tabBarPosition="top" 
@@ -106,10 +106,10 @@ const ProfileScreen = () => (
 )
 
 const HomeStack = () => (
-  <Stack.Navigator headerMode="none" initialRouteName="Swipe">
+  <Stack.Navigator headerMode="none" initialRouteName="HomeTab">
     <Stack.Screen 
-      name="Swipe" 
-      component={Swipe}/>
+      name="HomeTab" 
+      component={HomeTab}/>
     <Stack.Screen 
       name="Chat" 
       component={ChatScreen}/>
