@@ -1,20 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView, View, Text, PermissionsAndroid, Alert} from 'react-native';
 
-import {connect} from '../../../context';
-
 import styles from './styles';
 
 const TEXT = {
     brand: 'So Chat',
 };
 
-const SplashScreen = (props) => {
+const SplashScreen = ({setIsLoading}) => {
     const [permission, setPermission] = useState(null);
 
     useEffect(() => {
         checkPermission();
-
         return checkPermission();
     }, [])
 
@@ -23,7 +20,7 @@ const SplashScreen = (props) => {
             return;
         }
 
-        props.isLoading(false);
+        setIsLoading(false);
     }, [permission])
 
     const checkPermission = () => {
@@ -69,4 +66,4 @@ const SplashScreen = (props) => {
     );
 };
 
-export default connect(SplashScreen);
+export default SplashScreen;

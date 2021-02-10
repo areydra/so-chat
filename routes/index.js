@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
+import FirebaseAuth from '@react-native-firebase/auth';
 
 import AuthStack from './stack/AuthStack';
 import HomeStack from './stack/HomeStack';
@@ -9,10 +10,27 @@ import {connect} from 'react-redux';
 
 const Stack = createStackNavigator();
 
-const Router = ({currentUser}) => {
-  if (!currentUser.uid) {
+const authUid = FirebaseAuth().currentUser.uid;
+
+const Router = ({currentUserUid}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    checkUserHasSignedIn();
+  }, [currentUserUid])
+
+  const checkUserHasSignedIn = () => {
+    const userHasSignedIn = !authUid && !currentUserUid;
+    setIsSignedIn(userHasSignedIn);
+  }
+
+  if (isLoading) {
     return (
-      <SplashScreen/>
+      <SplashScreen
+        authUid={authUid}
+        currentUserUid={currentUserUid}
+        setIsLoading={setIsLoading}/>
     );
   }
 
@@ -36,7 +54,7 @@ const Router = ({currentUser}) => {
 }
 
 const mapStateToProps = ({currentUser}) => ({
-  currentUser,
+  currentUserUid: currentUser.uid,
 });
 
 export default connect(mapStateToProps)(Router);
