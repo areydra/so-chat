@@ -14,7 +14,10 @@ export function fetchCurrentUser() {
 
         dispatch({
             type: FETCH_CURRENT_USER,
-            payload: currentUser,
+            payload: {
+                uid: currentUser.id,
+                ...currentUser.data()
+            },
         });
     }
 }
