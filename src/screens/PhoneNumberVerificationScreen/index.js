@@ -8,11 +8,12 @@ import {
     TextInput,
     ActivityIndicator,
 } from 'react-native';
-import { StackActions } from '@react-navigation/native';
+import {connect} from 'react-redux';
+import {StackActions} from '@react-navigation/native';
 
 import styles from './styles';
 import Color from '../../constants/Colors';
-import {connect} from '../../../context';
+import {fetchCurrentUser} from '../../../redux/currentUser/currentUserActions';
 
 const TEXT = {
     wrongPhoneNumber: 'Wrong phone number? ',
@@ -21,10 +22,18 @@ const TEXT = {
     placeHolder: 'Your verification code',
 }
 
-const PhoneNumberVerificationScreen = props => {
+const PhoneNumberVerificationScreen = ({currentUser, route, ... props}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [verificationCode, setVerificationCode] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    useEffect(() => {
+        if (!currentUser.uid) {
+            return;
+        }
+
+        navigateToAccountInformationScreen();
+    }, [currentUser])
 
     useEffect(() => {
         if (!errorMessage) {
@@ -49,8 +58,8 @@ const PhoneNumberVerificationScreen = props => {
     
     const verifyPhoneNumber = async() => {
         try {
-            await props.route.params?.confirmation?.confirm(verificationCode);
-            navigateToAccountInformationScreen();
+            await route.params?.confirmation?.confirm(verificationCode);
+            props.fetchCurrentUser();
         } catch(err) {
             setIsLoading(false);
             setErrorMessage('Invalid verification code!');
@@ -128,4 +137,12 @@ const PhoneNumberVerificationScreen = props => {
     );
 };
 
-export default connect(PhoneNumberVerificationScreen);
+const mapStateToProps = ({currentUser}) => ({
+    currentUser,
+});
+
+const mapDispatchToProps = {
+    fetchCurrentUser,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(PhoneNumberVerificationScreen);
