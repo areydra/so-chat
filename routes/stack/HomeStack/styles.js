@@ -5,8 +5,7 @@ const {width} = Dimensions.get('window');
 
 export default StyleSheet.create({
     containerTabBarOptions: {
-        color: Color.white,
-        alignSelf: 'center',
+        backgroundColor: Color.main,
     },
     containerChildTabBarOptions: {
         width: width/3,
