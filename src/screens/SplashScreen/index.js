@@ -1,13 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView, View, Text, PermissionsAndroid, Alert} from 'react-native';
+import {connect} from 'react-redux';
 
 import styles from './styles';
+import {fetchCurrentUser} from '../../../redux/currentUser/currentUserActions';
 
 const TEXT = {
     brand: 'So Chat',
 };
 
-const SplashScreen = ({setIsLoading}) => {
+const SplashScreen = ({authUid, setIsLoading, setIsSignedIn, currentUser, ... props}) => {
     const [permission, setPermission] = useState(null);
 
     useEffect(() => {
@@ -20,8 +22,17 @@ const SplashScreen = ({setIsLoading}) => {
             return;
         }
 
-        setIsLoading(false);
+        getAccountInformation();
     }, [permission])
+
+    useEffect(() => {
+        if (!currentUser.uid) {
+            return;
+        }
+
+        setIsLoading(false);
+        setIsSignedIn(true);
+    }, [currentUser])
 
     const checkPermission = () => {
         PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(locationPermission => {
@@ -45,6 +56,15 @@ const SplashScreen = ({setIsLoading}) => {
             .catch(err => console.warn(err));
     };
 
+    const getAccountInformation = () => {
+        if (!authUid) {
+            setIsLoading(false);
+            return;
+        }
+
+        props.fetchCurrentUser();
+    }
+
     const showAlertPermissionNotGranted = () => {
         Alert.alert(
             'Failed',
@@ -66,4 +86,12 @@ const SplashScreen = ({setIsLoading}) => {
     );
 };
 
-export default SplashScreen;
+const mapStateToProps = ({currentUser}) => ({
+    currentUser,
+});
+
+const mapDispatchToProps = {
+    fetchCurrentUser,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(SplashScreen);
