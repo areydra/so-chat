@@ -19,6 +19,7 @@ import {connect} from 'react-redux';
 import styles from './styles';
 import Icon from '../../assets/icons';
 import {setIsSignedIn} from '../../../redux/authentication/authenticationActions';
+import {setCurrentUser} from '../../../redux/currentUser/currentUserActions';
 
 const IMAGE_PICKER_OPTIONS = {
   title: 'Select Image',
@@ -59,6 +60,14 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
 
     setError(null);
   }, [name])
+
+  useEffect(() => {
+    if (props.isProfile || !isLoading) {
+      return;
+    }
+
+    props.setIsSignedIn(true);
+  }, [currentUser])
 
   const checkPermission = () => {
     let checkPermissionCamera = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
@@ -141,9 +150,9 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
       await FirebaseFirestore().collection('users').doc(authUser?.uid).update(payload.collection);
     } else {
       await FirebaseFirestore().collection('users').doc(authUser?.uid).set(payload.collection);
-      props.setIsSignedIn(true);
     }
 
+    props.setCurrentUser({uid: authUser?.uid, ...payload.collection});
     await FirebaseAuth().currentUser.updateProfile(payload.authentication);
 
     setIsLoading(false);
@@ -249,6 +258,7 @@ const mapStateToProps = ({currentUser}) => ({
 
 const mapDispatchToProps = {
   setIsSignedIn,
-}
+  setCurrentUser,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(AccountInformationScreen);
