@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import FirebaseAuth from '@react-native-firebase/auth';
 import {connect} from 'react-redux';
 
 import AuthStack from './stack/AuthStack';
@@ -10,16 +9,12 @@ import {SplashScreen} from '../src/screens';
 
 const Stack = createStackNavigator();
 
-const authUid = FirebaseAuth().currentUser?.uid;
-
 const Router = ({authentication}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   if (isLoading) {
     return (
-      <SplashScreen
-        authUid={authUid}
-        setIsLoading={setIsLoading}/>
+      <SplashScreen setIsLoading={setIsLoading}/>
     );
   }
 

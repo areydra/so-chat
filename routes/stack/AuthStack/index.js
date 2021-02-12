@@ -1,6 +1,5 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import {connect} from 'react-redux';
 import FirebaseAuth from '@react-native-firebase/auth';
 
 import {
@@ -12,11 +11,11 @@ import {
 import styles from './styles';
 
 const Stack = createStackNavigator();
-const authUid = FirebaseAuth().currentUser?.uid;
+const authUser = FirebaseAuth().currentUser;
 
-const AuthStack = ({currentUserUid}) => {
+const AuthStack = () => {
   let initialRouteName = 'LoginScreen';
-  let shouldHaveDisplayName = authUid && !currentUserUid;
+  let shouldHaveDisplayName = authUser?.uid && !authUser?.displayName;
 
   if (shouldHaveDisplayName) {
     initialRouteName='AccountInformationScreen';
@@ -49,8 +48,4 @@ const AuthStack = ({currentUserUid}) => {
   )
 }
 
-const mapStateToProps = ({currentUser}) => ({
-  currentUserUid: currentUser.uid
-});
-
-export default connect(mapStateToProps)(AuthStack);
+export default AuthStack;

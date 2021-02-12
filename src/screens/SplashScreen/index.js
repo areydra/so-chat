@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView, View, Text, PermissionsAndroid, Alert} from 'react-native';
 import {connect} from 'react-redux';
+import FirebaseAuth from '@react-native-firebase/auth';
 
 import styles from './styles';
 import {fetchCurrentUser} from '../../../redux/currentUser/currentUserActions';
@@ -10,7 +11,9 @@ const TEXT = {
     brand: 'So Chat',
 };
 
-const SplashScreen = ({authUid, setIsLoading, currentUser, ... props}) => {
+const authDisplayName = FirebaseAuth().currentUser?.displayName;
+
+const SplashScreen = ({setIsLoading, currentUser, ... props}) => {
     const [permission, setPermission] = useState(null);
 
     useEffect(() => {
@@ -58,7 +61,7 @@ const SplashScreen = ({authUid, setIsLoading, currentUser, ... props}) => {
     };
 
     const getAccountInformation = () => {
-        if (!authUid) {
+        if (!authDisplayName) {
             setIsLoading(false);
             return;
         }
