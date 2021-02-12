@@ -1,7 +1,7 @@
 import FirebaseAuth from '@react-native-firebase/auth';
 import FirebaseFirestore from '@react-native-firebase/firestore';
 
-import {FETCH_CURRENT_USER, RESET_CURRENT_USER} from './currentUserActionTypes';
+import {FETCH_CURRENT_USER, RESET_CURRENT_USER, SET_CURRENT_USER} from './currentUserActionTypes';
 
 export function fetchCurrentUser() {
     return async (dispatch) => {
@@ -20,6 +20,17 @@ export function fetchCurrentUser() {
             },
         });
     }
+}
+
+export function setCurrentUser(currentUser) {
+    return async (dispatch) => {
+        dispatch({
+            type: SET_CURRENT_USER,
+            payload: {
+                currentUser,
+            },
+        });
+    };
 }
 
 export function resetCurrentUser() {

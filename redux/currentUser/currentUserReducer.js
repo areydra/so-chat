@@ -11,6 +11,7 @@ const initialState = {
 export function currentUserReducer(state = initialState, action) {
     switch (action.type) {
         case FETCH_CURRENT_USER:
+        case SET_CURRENT_USER:
             return {
                 ...state,
                 ...action.payload,
