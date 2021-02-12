@@ -1,4 +1,4 @@
-import {FETCH_CURRENT_USER, RESET_CURRENT_USER} from './currentUserActionTypes';
+import {FETCH_CURRENT_USER, RESET_CURRENT_USER, SET_CURRENT_USER} from './currentUserActionTypes';
 
 const initialState = {
     uid: null,
