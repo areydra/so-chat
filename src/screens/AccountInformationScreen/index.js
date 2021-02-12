@@ -14,10 +14,10 @@ import Geolocation from '@react-native-community/geolocation';
 import FirebaseAuth from '@react-native-firebase/auth';
 import FirebaseStorage from '@react-native-firebase/storage';
 import FirebaseFirestore from '@react-native-firebase/firestore';
+import {connect} from 'react-redux';
 
 import styles from './styles';
 import Icon from '../../assets/icons';
-import {connect} from '../../../context';
 
 const IMAGE_PICKER_OPTIONS = {
   title: 'Select Image',
@@ -35,27 +35,19 @@ const TEXT = {
   button: 'Save'
 }
 
-const AccountInformationScreen = (props) => {
+const AccountInformationScreen = ({currentUser, ... props}) => {
   const [name, setName] = useState(null);
-  const [user, setUser] = useState(null);
   const [about, setAbout] = useState(null);
-  const [phoneNumber, setPhoneNumber] = useState(null);
   const [error, setError] = useState(null);
   const [location, setLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState(false);
   const [avatar, setAvatar] = useState(null);
-  const [defaultAvatar, setDefaultAvatar] = useState(null);
-
-  useEffect(() => {
-    setUser(FirebaseAuth().currentUser);
-  }, [])
 
   useEffect(() => {
     getLocation();
-    getAccountInformation();
     checkPermission();
-  }, [user])
+  }, [])
 
   useEffect(() => {
     if (!error) {
@@ -98,20 +90,6 @@ const AccountInformationScreen = (props) => {
     })
   }
 
-  const getAccountInformation = async() => {
-    const currentUser = await FirebaseFirestore().collection('users').doc(user.uid).get();
-
-    if (!currentUser.data()) {
-      setDefaultAvatar(Icon.avatar);
-      return;
-    }
-
-    setName(currentUser.data().name);
-    setAbout(currentUser.data().about);
-    setPhoneNumber(currentUser.data().phoneNumber);
-    setDefaultAvatar({uri: currentUser.data().photo});
-  }
-
   const changeAvatar = () => {
     if (!permission) {
       return requestPermission();
@@ -128,11 +106,11 @@ const AccountInformationScreen = (props) => {
   };
 
   const prepareSaveAccountInformation = async() => {
-    if (!user?.uid) {
+    if (!currentUser?.uid) {
       return;
     }
 
-    if (!name) {
+    if (!name && !currentUser?.name) {
       setError('Name cannot be null!');
       return;
     }
@@ -142,8 +120,8 @@ const AccountInformationScreen = (props) => {
       setIsLoading(true);
 
       if (avatar) {
-        await FirebaseStorage().ref(`images/${user?.uid}`).putFile(avatar.uri);
-        imageUri = await FirebaseStorage().ref(`images/${user?.uid}`).getDownloadURL();
+        await FirebaseStorage().ref(`images/${currentUser?.uid}`).putFile(avatar.uri);
+        imageUri = await FirebaseStorage().ref(`images/${currentUser?.uid}`).getDownloadURL();
       }
 
       saveAccountInformation(imageUri);  
@@ -159,9 +137,9 @@ const AccountInformationScreen = (props) => {
     await FirebaseAuth().currentUser.updateProfile(payload.authentication);
 
     if (props.isProfile) {
-      await FirebaseFirestore().collection('users').doc(user.uid).update(payload.collection);
+      await FirebaseFirestore().collection('users').doc(currentUser.uid).update(payload.collection);
     } else {
-      await FirebaseFirestore().collection('users').doc(user.uid).set(payload.collection);
+      await FirebaseFirestore().collection('users').doc(currentUser.uid).set(payload.collection);
       props.signIn(true);
     }
 
@@ -169,16 +147,17 @@ const AccountInformationScreen = (props) => {
   };
 
   const getPayloadAccountInformation = (imageUri) => {
+    let defaultName = name ?? currentUser?.name;
     let defaultCollection = {
-      name,
+      name: defaultName,
       about,
       location,
       status: 'Online',
-      phoneNumber,
+      phoneNumber: currentUser.phoneNumber,
     };
 
     let defaultAuthentication = {
-      displayName: name,
+      displayName: defaultName,
     };
 
     if (imageUri) {
@@ -189,7 +168,7 @@ const AccountInformationScreen = (props) => {
     }
 
     return {
-      collection: {photo: user?.photoURL, ...defaultCollection},
+      collection: {photo: currentUser?.photo, ...defaultCollection},
       authentication: defaultAuthentication,
     };
   }
@@ -202,12 +181,24 @@ const AccountInformationScreen = (props) => {
     return styles.container;
   }
 
+  const getDefaultAvatar = () => {
+    if (avatar) {
+      return avatar;
+    }
+
+    if (currentUser?.photo) {
+      return {uri: currentUser?.photo};
+    }
+
+    return Icon.avatar;
+  }
+
   return (
     <View style={getStyleContainer()}>
       <TouchableOpacity onPress={changeAvatar}>
         <View style={styles.imageProfile}>
           <Image 
-            source={avatar ?? defaultAvatar} 
+            source={getDefaultAvatar()} 
             style={styles.iconAvatar}/>
           <Image 
             source={Icon.camera} 
@@ -218,16 +209,16 @@ const AccountInformationScreen = (props) => {
         <TextInput
           style={styles.textInput}
           placeholder={TEXT.name}
-          defaultValue={name}
+          defaultValue={name ?? currentUser.name}
           onChangeText={setName}/>
         <TextInput
           style={styles.textInput}
           placeholder={TEXT.about}
-          defaultValue={about}
+          defaultValue={about ?? currentUser.about}
           onChangeText={setAbout}/>
         <TextInput
           style={styles.textInput}
-          value={phoneNumber?.replace('+62', '0')}
+          value={currentUser.phoneNumber?.replace('+62', '0')}
           placeholder={TEXT.phoneNumber}
           editable={false}/>
         {error && (
@@ -249,4 +240,8 @@ const AccountInformationScreen = (props) => {
   );
 }
 
-export default connect(AccountInformationScreen);
+const mapStateToProps = ({currentUser}) => ({
+  currentUser,
+});
+
+export default connect(mapStateToProps)(AccountInformationScreen);
