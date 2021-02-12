@@ -6,13 +6,12 @@ import FirebaseAuth from '@react-native-firebase/auth';
 import AuthStack from './stack/AuthStack';
 import HomeStack from './stack/HomeStack';
 import {SplashScreen} from '../src/screens';
-import {connect} from 'react-redux';
 
 const Stack = createStackNavigator();
 
 const authUid = FirebaseAuth().currentUser?.uid;
 
-const Router = ({currentUserUid}) => {
+const Router = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSignedIn, setIsSignedIn] = useState(false);
 
@@ -31,12 +30,7 @@ const Router = ({currentUserUid}) => {
         {!isSignedIn ? (
           <Stack.Screen 
             name="Auth" 
-            component={() => (
-              <AuthStack 
-                authUid={authUid}
-                currentUserUid={currentUserUid}
-              />
-            )} 
+            component={AuthStack} 
             options={() => ({headerShown: false})}/> 
         ):(
           <Stack.Screen 
@@ -49,8 +43,4 @@ const Router = ({currentUserUid}) => {
   )
 }
 
-const mapStateToProps = ({currentUser}) => ({
-  currentUserUid: currentUser.uid,
-});
-
-export default connect(mapStateToProps)(Router);
+export default Router;
