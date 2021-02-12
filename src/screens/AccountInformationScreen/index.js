@@ -37,8 +37,6 @@ const TEXT = {
   button: 'Save'
 }
 
-const authUser = FirebaseAuth().currentUser;
-
 const AccountInformationScreen = ({currentUser, ... props}) => {
   const [name, setName] = useState(null);
   const [about, setAbout] = useState(null);
@@ -47,8 +45,10 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState(false);
   const [avatar, setAvatar] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
 
   useEffect(() => {
+    setAuthUser(FirebaseAuth().currentUser);
     getLocation();
     checkPermission();
   }, [])
