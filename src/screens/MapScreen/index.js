@@ -90,11 +90,17 @@ const MapScreen = ({route, ... props}) => {
                 showsUserLocation={true}
                 followUserLocation={true}
                 region={getRegion()}>
-                    {route.params?.users?.map((data, index) => (
-                        <MarkerUsers
-                            key={index}
-                            user={data}/>
-                    ))}
+                    {route.params?.users?.map((data, index) => {
+                        if (!data.location) {
+                            return;
+                        }
+
+                        return (
+                            <MarkerUsers
+                                key={index}
+                                user={data}/>
+                        );
+                    })}
             </MapView>
         </View>
     )
