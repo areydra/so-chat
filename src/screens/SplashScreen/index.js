@@ -4,12 +4,13 @@ import {connect} from 'react-redux';
 
 import styles from './styles';
 import {fetchCurrentUser} from '../../../redux/currentUser/currentUserActions';
+import {setIsSignedIn} from '../../../redux/authentication/authenticationActions';
 
 const TEXT = {
     brand: 'So Chat',
 };
 
-const SplashScreen = ({authUid, setIsLoading, setIsSignedIn, currentUser, ... props}) => {
+const SplashScreen = ({authUid, setIsLoading, currentUser, ... props}) => {
     const [permission, setPermission] = useState(null);
 
     useEffect(() => {
@@ -31,7 +32,7 @@ const SplashScreen = ({authUid, setIsLoading, setIsSignedIn, currentUser, ... pr
         }
 
         setIsLoading(false);
-        setIsSignedIn(true);
+        props.setIsSignedIn(true);
     }, [currentUser])
 
     const checkPermission = () => {
@@ -92,6 +93,7 @@ const mapStateToProps = ({currentUser}) => ({
 
 const mapDispatchToProps = {
     fetchCurrentUser,
+    setIsSignedIn,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SplashScreen);

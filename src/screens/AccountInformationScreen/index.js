@@ -18,6 +18,7 @@ import {connect} from 'react-redux';
 
 import styles from './styles';
 import Icon from '../../assets/icons';
+import {setIsSignedIn} from '../../../redux/authentication/authenticationActions';
 
 const IMAGE_PICKER_OPTIONS = {
   title: 'Select Image',
@@ -140,7 +141,7 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
       await FirebaseFirestore().collection('users').doc(currentUser.uid).update(payload.collection);
     } else {
       await FirebaseFirestore().collection('users').doc(currentUser.uid).set(payload.collection);
-      props.signIn(true);
+      props.setIsSignedIn(true);
     }
 
     setIsLoading(false);
@@ -244,4 +245,8 @@ const mapStateToProps = ({currentUser}) => ({
   currentUser,
 });
 
-export default connect(mapStateToProps)(AccountInformationScreen);
+const mapDispatchToProps = {
+  setIsSignedIn,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountInformationScreen);
