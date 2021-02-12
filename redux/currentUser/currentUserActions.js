@@ -27,7 +27,7 @@ export function setCurrentUser(currentUser) {
         dispatch({
             type: SET_CURRENT_USER,
             payload: {
-                currentUser,
+                ...currentUser,
             },
         });
     };
