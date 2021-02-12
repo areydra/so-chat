@@ -10,6 +10,7 @@ import {
     Image,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import {StackActions} from '@react-navigation/native';
 
 import styles from './styles';
 import Icon from '../../assets/icons';
@@ -65,13 +66,19 @@ const LoginScreen = props => {
 
     const signIn = async() => {
         await auth().signInWithPhoneNumber(indonesiaPhoneNumber(phoneNumber)).then(confirmation => {
-            props.navigation.navigate('PhoneNumberVerificationScreen', {confirmation});
+            navigatePhoneNumberVerificationScreen(confirmation);
         }).catch(err => {
             setPhoneNumber(null);
             setErrorMessage(err.message);
         });
 
         setIsLoading(false);
+    }
+
+    const navigatePhoneNumberVerificationScreen = (confirmation) => {
+        props.navigation.dispatch(
+            StackActions.replace('PhoneNumberVerificationScreen', {confirmation})
+        );
     }
 
     const indonesiaPhoneNumber = (phoneNumber) => {
