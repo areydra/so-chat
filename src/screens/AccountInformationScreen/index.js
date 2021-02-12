@@ -36,6 +36,8 @@ const TEXT = {
   button: 'Save'
 }
 
+const authUser = FirebaseAuth().currentUser;
+
 const AccountInformationScreen = ({currentUser, ... props}) => {
   const [name, setName] = useState(null);
   const [about, setAbout] = useState(null);
@@ -107,11 +109,11 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
   };
 
   const prepareSaveAccountInformation = async() => {
-    if (!currentUser?.uid) {
+    if (!authUser?.uid) {
       return;
     }
 
-    if (!name && !currentUser?.name) {
+    if (!name) {
       setError('Name cannot be null!');
       return;
     }
@@ -121,8 +123,8 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
       setIsLoading(true);
 
       if (avatar) {
-        await FirebaseStorage().ref(`images/${currentUser?.uid}`).putFile(avatar.uri);
-        imageUri = await FirebaseStorage().ref(`images/${currentUser?.uid}`).getDownloadURL();
+        await FirebaseStorage().ref(`images/${authUser?.uid}`).putFile(avatar.uri);
+        imageUri = await FirebaseStorage().ref(`images/${authUser?.uid}`).getDownloadURL();
       }
 
       saveAccountInformation(imageUri);  
@@ -135,14 +137,14 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
   const saveAccountInformation = async(imageUri) => {
     const payload = getPayloadAccountInformation(imageUri);
 
-    await FirebaseAuth().currentUser.updateProfile(payload.authentication);
-
     if (props.isProfile) {
-      await FirebaseFirestore().collection('users').doc(currentUser.uid).update(payload.collection);
+      await FirebaseFirestore().collection('users').doc(authUser?.uid).update(payload.collection);
     } else {
-      await FirebaseFirestore().collection('users').doc(currentUser.uid).set(payload.collection);
+      await FirebaseFirestore().collection('users').doc(authUser?.uid).set(payload.collection);
       props.setIsSignedIn(true);
     }
+
+    await FirebaseAuth().currentUser.updateProfile(payload.authentication);
 
     setIsLoading(false);
   };
@@ -210,7 +212,7 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
         <TextInput
           style={styles.textInput}
           placeholder={TEXT.name}
-          defaultValue={name ?? currentUser.name}
+          value={currentUser?.name}
           onChangeText={setName}/>
         <TextInput
           style={styles.textInput}
@@ -219,7 +221,7 @@ const AccountInformationScreen = ({currentUser, ... props}) => {
           onChangeText={setAbout}/>
         <TextInput
           style={styles.textInput}
-          value={currentUser.phoneNumber?.replace('+62', '0')}
+          value={(FirebaseAuth().currentUser?.phoneNumber).replace('+62', '0')}
           placeholder={TEXT.phoneNumber}
           editable={false}/>
         {error && (
