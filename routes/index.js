@@ -10,7 +10,7 @@ import {connect} from 'react-redux';
 
 const Stack = createStackNavigator();
 
-const authUid = FirebaseAuth().currentUser.uid;
+const authUid = FirebaseAuth().currentUser?.uid;
 
 const Router = ({currentUserUid}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,6 @@ const Router = ({currentUserUid}) => {
     return (
       <SplashScreen
         authUid={authUid}
-        currentUserUid={currentUserUid}
         setIsLoading={setIsLoading}
         setIsSignedIn={setIsSignedIn}/>
     );
