@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView, FlatList} from 'react-native';
 import moment from 'moment';
-import FirebaseAuth from '@react-native-firebase/auth';
+import {connect} from 'react-redux';
 import FirebaseFirestore from '@react-native-firebase/firestore';
 
 import Card from './components/Card';
@@ -10,9 +10,7 @@ import Search from '../../components/Search';
 import styles from './styles';
 import Icon from '../../assets/icons';
 
-const currentUser = FirebaseAuth().currentUser;
-
-const MessagesScreen = ({navigation}) => {
+const MessagesScreen = ({navigation, currentUser}) => {
   const [messages, setMessages] = useState([]);
   const [filteredMessages, setFilteredMessages] = useState(null);
 
@@ -108,4 +106,8 @@ const MessagesScreen = ({navigation}) => {
   );
 }
 
-export default MessagesScreen;
+const mapStateToProps = ({currentUser}) => ({
+  currentUser,
+});
+
+export default connect(mapStateToProps)(MessagesScreen);
