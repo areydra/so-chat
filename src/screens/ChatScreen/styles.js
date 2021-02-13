@@ -1,7 +1,8 @@
 import {StyleSheet, Dimensions} from 'react-native';
+import Color from '../../constants/Colors';
 
-const { width } = Dimensions.get('window')
- 
+const {width} = Dimensions.get('window')
+
 const styles = StyleSheet.create({
     container: {
         flex: 1
@@ -9,7 +10,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         height: width / 5.5,
-        backgroundColor: '#2FAEB2',
+        backgroundColor: Color.main,
         alignItems: 'center',
     },
     arrowBack: {
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
         borderRadius: 55,
         marginHorizontal: 15,
         overflow: 'hidden',
-        backgroundColor: 'white',
+        backgroundColor: Color.white,
     },
     image: {
         width: '100%', 
@@ -50,34 +51,36 @@ const styles = StyleSheet.create({
         flexGrow: 1
     },
     messageUserContainer: {
-        backgroundColor: '#E5E5E5', 
+        backgroundColor: Color.lightGrey, 
         paddingVertical: 5, 
         paddingHorizontal: 40, 
         marginVertical: 5,
-        color: 'black',
+        color: Color.black,
         alignSelf: 'flex-end',
         borderRadius: 25
     },
     messageUser: {
+        color: Color.black,
         marginLeft: -25
     },
     messageUserTime: {
         fontSize: 10, 
         marginTop: -3, 
         marginRight: -25, 
-        textAlign: 'right'
+        textAlign: 'right',
+        color: Color.black
     },
     messageFriendContainer: {
-        backgroundColor: '#2FAEB2',
+        backgroundColor: Color.main,
         paddingVertical: 5,
         paddingHorizontal: 40,
         marginVertical: 5,
-        color: 'white',
+        color: Color.white,
         alignSelf: 'flex-start',
         borderRadius: 25
     },
     messageFriend: {
-        color: 'white', 
+        color: Color.white, 
         marginLeft: -25
     },
     messageFriendTime: {
@@ -85,13 +88,13 @@ const styles = StyleSheet.create({
         marginTop: -3, 
         marginRight: -25, 
         textAlign: 'right', 
-        color: 'white' 
+        color: Color.white 
     },
     textInputContainer: {
         borderWidth: 1,
         borderRadius: 25,
-        borderColor: '#E3E3E3',
-        color: '#E3E3E3',
+        borderColor: Color.grey,
+        color: Color.grey,
         marginBottom: 10,
         marginHorizontal: width / 20,
         position: 'relative'

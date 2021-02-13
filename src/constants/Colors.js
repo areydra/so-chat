@@ -7,4 +7,5 @@ export default {
     red: 'red',
     greenStabilo: '#00ff2f',
     transparent: 'transparent',
+    lightGrey: '#E5E5E5',
 }
