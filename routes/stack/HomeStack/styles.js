@@ -19,7 +19,7 @@ export default StyleSheet.create({
         borderBottomColor: Color.white,
         borderBottomWidth: 3,
     },
-    chatScreenBackImage: {
+    iconArrowBack: {
         width:20,
         height: 20,
         marginHorizontal: 8,
@@ -46,5 +46,17 @@ export default StyleSheet.create({
     chatScreenTitleTextStatus: {
         fontSize: 12,
         color: Color.white
-    }
+    },
+    mapScreenHeaderContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        backgroundColor: Color.main,
+    },
+    mapScreenTitleStyle: {
+        flex: 1,
+        paddingRight: 44,
+        textAlign: 'center',
+        color: Color.white,
+    },
 });

@@ -72,7 +72,14 @@ const HomeStack = () => (
     />
     <Stack.Screen 
       name="Map" 
-      component={MapScreen}/>
+      component={MapScreen}
+      options={({route, navigation}) => ({
+        header: () => (
+          <HeaderMap
+            title={route.params?.title}
+            backToPrevScreen={() => navigation.goBack()}/>
+        ),
+      })}/>
   </Stack.Navigator>
 )
 
@@ -81,7 +88,7 @@ const HeaderChat = ({name, status, photo, backToPrevScreen}) => (
     <TouchableOpacity onPress={backToPrevScreen}>
       <Image 
         source={Icon.arrowBackWhite} 
-        style={styles.chatScreenBackImage}/>
+        style={styles.iconArrowBack}/>
     </TouchableOpacity>
     <Image 
       source={photo}
@@ -90,6 +97,17 @@ const HeaderChat = ({name, status, photo, backToPrevScreen}) => (
       <Text style={styles.chatScreenTitleTextName}>{name}</Text>
       <Text style={styles.chatScreenTitleTextStatus}>{status}</Text>    
     </View>
+  </View>
+);
+
+const HeaderMap = ({title, backToPrevScreen}) => (
+  <View style={styles.mapScreenHeaderContainer}>
+    <TouchableOpacity onPress={backToPrevScreen}>
+      <Image 
+        source={Icon.arrowBackWhite} 
+        style={styles.iconArrowBack}/>
+    </TouchableOpacity>
+    <Text style={styles.mapScreenTitleStyle}>{title}</Text>
   </View>
 );
 

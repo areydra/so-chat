@@ -1,10 +1,7 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
     SafeAreaView,
     View,
-    Text,
-    Image,
-    TouchableOpacity,
 } from 'react-native';
 import {Thumbnail} from 'native-base';
 import MapView, {Marker} from 'react-native-maps';
@@ -17,6 +14,12 @@ import Color from '../../constants/Colors';
 const currentUser = FirebaseAuth().currentUser;
 
 const MapScreen = ({route, ... props}) => {
+    useEffect(() => {
+        props.navigation.setParams({
+            title: getTitleNavbar(),
+        });
+    }, []);
+
     const getAvatar = (user) => {
         const userAvatar = {uri: user.photo};
 
@@ -78,10 +81,6 @@ const MapScreen = ({route, ... props}) => {
         };
     }
 
-    const backToPrevScene = () => {
-        props.navigation.goBack();
-    }
- 
     const MapViewUsers = () => (
         <View style={styles.locationContainer}>
             <MapView 
@@ -124,14 +123,6 @@ const MapScreen = ({route, ... props}) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.titleContainer}>
-                <TouchableOpacity onPress={backToPrevScene}>
-                    <Image 
-                        source={Icon.arrowBackBlack} 
-                        style={styles.arrowBack}/>
-                </TouchableOpacity>
-                <Text style={styles.title}>{getTitleNavbar()}</Text>
-            </View>
             <MapViewUsers/>
         </SafeAreaView>
     );
