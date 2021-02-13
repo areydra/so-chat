@@ -11,6 +11,7 @@ import {
 import {connect} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
 import FirebaseAuth from '@react-native-firebase/auth';
+import FirebaseFirestore from '@react-native-firebase/firestore';
 
 import styles from './styles';
 import Color from '../../constants/Colors';
@@ -35,7 +36,8 @@ const PhoneNumberVerificationScreen = ({currentUser, route, ... props}) => {
         }
 
         if (FirebaseAuth().currentUser?.displayName) {
-            props.setIsSignedIn(true);
+            prepareSignedIn();
+            return;
         }
 
         navigateToAccountInformationScreen();
@@ -70,6 +72,11 @@ const PhoneNumberVerificationScreen = ({currentUser, route, ... props}) => {
             setIsLoading(false);
             setErrorMessage('Invalid verification code!');
         }
+    }
+
+    const prepareSignedIn = async() => {
+        await FirebaseFirestore().collection('users').doc(FirebaseAuth().currentUser?.uid).update({status: 'Online'});
+        props.setIsSignedIn(true);
     }
 
     const getStylesTextInput = () => {
