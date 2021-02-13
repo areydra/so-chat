@@ -25,7 +25,7 @@ const MessagesScreen = ({navigation, currentUser}) => {
       return;
     }
 
-    FirebaseFirestore().collection('chatRooms').doc(currentUser.uid).collection('chatLists').onSnapshot(roomChats => {
+    FirebaseFirestore().collection('chatRooms').doc(currentUser.uid).collection('chatLists').orderBy('lastMessage.createdAt', 'desc').onSnapshot(roomChats => {
       const allRoomChats = [];
 
       roomChats.forEach(roomChat => {
