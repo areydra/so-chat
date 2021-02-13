@@ -19,4 +19,32 @@ export default StyleSheet.create({
         borderBottomColor: Color.white,
         borderBottomWidth: 3,
     },
+    chatScreenBackImage: {
+        width:20,
+        height: 20,
+        marginHorizontal: 8,
+    },
+    chatScreenHeaderContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Color.main,
+        paddingVertical: 8,
+    },
+    chatScreenTitlePhoto: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: Color.white,
+    },
+    chatScreenTitleTextContainer: {
+        marginLeft: 16,
+    },
+    chatScreenTitleTextName: {
+        fontSize: 18,
+        color: Color.white,
+    },
+    chatScreenTitleTextStatus: {
+        fontSize: 12,
+        color: Color.white
+    }
 });

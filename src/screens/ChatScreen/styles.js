@@ -7,42 +7,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
-    header: {
-        flexDirection: 'row',
-        height: width / 5.5,
-        backgroundColor: Color.main,
-        alignItems: 'center',
-    },
-    arrowBack: {
-        height: 20,
-        width: 20,
-        marginLeft: 10,
-    },
-    containerImage: {
-        width: 55,
-        height: 55,
-        borderRadius: 55,
-        marginHorizontal: 15,
-        overflow: 'hidden',
-        backgroundColor: Color.white,
-    },
-    image: {
-        width: '100%', 
-        height: '100%', 
-        resizeMode: 'cover'
-    },
-    headerNameContainer: {
-        marginLeft: 5,
-        width: '55%'
-    },
-    headerName: {
-        fontSize: 20,
-    },
-    more: {
-        marginLeft: 10,
-        width: 25,
-        height: 25
-    },
     messageContainer: {
         flex: 1,
         marginHorizontal: 10

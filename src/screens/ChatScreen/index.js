@@ -33,6 +33,13 @@ const ChatScreen = ({route, navigation}) => {
         };
     }, [])
 
+    useEffect(() => {
+        navigation.setParams({
+            name: getFriendName(),
+            status: getFriendStatus(),
+        });
+    }, [friend])
+
     const getRealtimeFriendInformation = () => {
         const friendUid = route.params?.item?.id;
 
@@ -148,22 +155,6 @@ const ChatScreen = ({route, navigation}) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Image 
-                        source={Icon.arrowBackWhite} 
-                        style={styles.arrowBack}/>
-                </TouchableOpacity>
-                <View style={styles.containerImage}>
-                <Image 
-                    source={getFriendPhotoProfile()} 
-                    style={styles.image}/>
-                </View>
-                <View style={styles.headerNameContainer}>
-                    <Text style={styles.headerName}>{getFriendName()}</Text>
-                    <Text>{getFriendStatus()}</Text>
-                </View>
-            </View>
             <View style={styles.messageContainer}>
                 {messages?.length ? (
                     <FlatList
