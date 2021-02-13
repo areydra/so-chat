@@ -68,6 +68,10 @@ const MessagesScreen = ({navigation, currentUser}) => {
   };
 
   const textOverflowEllipsis = (text, limit) => {
+    if (!text) {
+      return;
+    }
+
     if (text.length > limit) {
         return `${text.substr(0, limit)}...`;
     }
