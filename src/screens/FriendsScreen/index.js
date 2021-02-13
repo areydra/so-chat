@@ -5,7 +5,7 @@ import {
     Text,
     TouchableOpacity,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
+import FirebaseAuth from '@react-native-firebase/auth';
 import FirebaseFirestore from '@react-native-firebase/firestore';
 
 import Card from './components/Card';
@@ -27,7 +27,7 @@ const FriendsScreen = (props) => {
     }, [])
 
     const getFriends = () => {
-        const currentUserUid = auth().currentUser?.uid;
+        const currentUserUid = FirebaseAuth().currentUser?.uid;
 
         if (!currentUserUid) {
             return;
@@ -37,7 +37,7 @@ const FriendsScreen = (props) => {
             const friends = [];
 
             users.forEach(user => {
-                if (user.id == auth().currentUser.uid) {
+                if (user.id == currentUserUid) {
                     return;
                 }
 
