@@ -111,14 +111,18 @@ const ChatScreen = ({route, navigation}) => {
         FirestoreBatch.commit();
     }
 
-    const convertTime = (time) => {
+    const convertTime = (time, isUserStatus) => {
         let record = new Date(time);
         let current = new Date();
         let result = (record.getHours() < 10 ? '0' : '') + record.getHours() + ':';
         result += (record.getMinutes() < 10 ? '0' : '') + record.getMinutes();
     
         if (current.getDay() !== record.getDay()) {
-            result = moment(time).format('ddd') + '  ' + result
+            return moment(time).format('ddd') + '  ' + result;
+        }
+
+        if (isUserStatus) {
+            return moment(time).calendar();
         }
     
         return result;
@@ -147,10 +151,17 @@ const ChatScreen = ({route, navigation}) => {
     }
 
     const getFriendStatus = () => {
-        const defaultStatus = route.params?.item?.status;
-        const status = friend?.status ?? defaultStatus;
+        let status = friend?.status ?? route.params?.item?.status;
 
-        return status;
+        if (!status) {
+            return;
+        }
+
+        if (status === 'Online') {
+            return status;
+        }
+
+        return convertTime(status, true);
     }
 
     return (
