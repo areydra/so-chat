@@ -37,6 +37,7 @@ const ChatScreen = ({route, navigation}) => {
         navigation.setParams({
             name: getFriendName(),
             status: getFriendStatus(),
+            photo: getFriendPhotoProfile(),
         });
     }, [friend])
 

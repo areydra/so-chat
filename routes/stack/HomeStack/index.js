@@ -65,7 +65,7 @@ const HomeStack = () => (
           <HeaderChat
             name={route.params?.name}
             status={route.params?.status}
-            photo={{uri: route.params?.item?.photo}}
+            photo={route.params?.photo}
             backToPrevScreen={() => navigation.goBack()}/>
         ),
       })}
