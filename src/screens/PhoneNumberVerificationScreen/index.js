@@ -10,10 +10,12 @@ import {
 } from 'react-native';
 import {connect} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
+import FirebaseAuth from '@react-native-firebase/auth';
 
 import styles from './styles';
 import Color from '../../constants/Colors';
 import {fetchCurrentUser} from '../../../redux/currentUser/currentUserActions';
+import {setIsSignedIn} from '../../../redux/authentication/authenticationActions';
 
 const TEXT = {
     wrongPhoneNumber: 'Wrong phone number? ',
@@ -30,6 +32,10 @@ const PhoneNumberVerificationScreen = ({currentUser, route, ... props}) => {
     useEffect(() => {
         if (!currentUser.uid) {
             return;
+        }
+
+        if (FirebaseAuth().currentUser?.displayName) {
+            props.setIsSignedIn(true);
         }
 
         navigateToAccountInformationScreen();
@@ -143,6 +149,7 @@ const mapStateToProps = ({currentUser}) => ({
 
 const mapDispatchToProps = {
     fetchCurrentUser,
+    setIsSignedIn,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhoneNumberVerificationScreen);
