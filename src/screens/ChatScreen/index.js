@@ -2,24 +2,23 @@ import React, {useEffect, useState} from 'react';
 import {
     SafeAreaView,
     FlatList,
-    Image,
-    TouchableOpacity,
     View,
-    Text,
 } from 'react-native';
 import moment from 'moment';
 import FirebaseAuth from '@react-native-firebase/auth';
 import FirebaseFirestore from '@react-native-firebase/firestore';
+import {connect} from 'react-redux';
 
 import Card from './components/Card';
 import InputBox from './components/InputBox';
 
 import styles from './styles';
 import Icon from '../../assets/icons';
+import {sendNotification} from '../../../redux/notification/notificationActions';
 
 const user = FirebaseAuth().currentUser;
 
-const ChatScreen = ({route, navigation}) => {
+const ChatScreen = ({route, navigation, ... props}) => {
     const [friend, setFriend] = useState(null);
     const [messages, setMessages] = useState([]);
 
@@ -109,7 +108,12 @@ const ChatScreen = ({route, navigation}) => {
         FirestoreBatch.set(currentUserChatRooms, payloadCurrentUserChatRooms);
         FirestoreBatch.set(friendRoomChatRooms, payloadFriendChatRooms);
 
-        FirestoreBatch.commit();
+        FirestoreBatch.commit().then(() => {
+            props.sendNotification(friend.tokenNotification, {
+                title: user.displayName,
+                body: message
+            });
+        });
     }
 
     const convertTime = (time, isUserStatus) => {
@@ -192,4 +196,8 @@ const ChatScreen = ({route, navigation}) => {
     );
 }
 
-export default ChatScreen;
+const mapDispatchToProps = {
+    sendNotification,
+};
+
+export default connect(null, mapDispatchToProps)(ChatScreen);
