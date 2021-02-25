@@ -111,7 +111,8 @@ const ChatScreen = ({route, navigation, ... props}) => {
         FirestoreBatch.commit().then(() => {
             props.sendNotification(friend.tokenNotification, {
                 title: user.displayName,
-                body: message
+                body: message,
+                tag: user.uid
             });
         });
     }

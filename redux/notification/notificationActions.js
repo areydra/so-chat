@@ -11,6 +11,7 @@ export function sendNotification(token, message) {
                 'notification': {
                     'title': message.title,
                     'body': message.body,
+                    'tag': message.tag
                 },    
             },
             {
