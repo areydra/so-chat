@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "cd android && ./gradlew clean && cd .. && react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "adb reverse tcp:8081 tcp:8081 && react-native start clear cache",
     "test": "jest",
     "lint": "eslint ."
   },
@@ -32,7 +32,7 @@
     "react-native-gesture-handler": "^1.6.1",
     "react-native-image-picker": "^1.1.0",
     "react-native-maps": "git+https://git@github.com/react-native-community/react-native-maps.git",
-    "react-native-push-notification": "^3.1.9",
+    "react-native-push-notification": "^7.2.1",
     "react-native-reanimated": "^1.9.0",
     "react-native-safe-area-context": "^3.1.1",
     "react-native-screens": "^2.9.0",
